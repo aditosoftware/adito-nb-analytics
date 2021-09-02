@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module-Name: Analytics and Usage Statistics
+OpenIDE-Module-Display-Category: ADITO / Analytics
+OpenIDE-Module-Long-Description: Collector for anonymous usage statistics
+OpenIDE-Module-Short-Description: Collects common platform analytics and anonymous usage statistics.
+ This data is send to ADITO, to improve the overall stability of the ADITO Designer at runtime.

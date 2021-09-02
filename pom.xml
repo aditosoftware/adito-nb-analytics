@@ -1,0 +1,46 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.adito.nbm</groupId>
+    <artifactId>plugin-parent</artifactId>
+    <version>1.1.0</version>
+  </parent>
+
+  <groupId>de.adito.aditoweb.nbm</groupId>
+  <artifactId>analytics</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>nbm</packaging>
+
+  <properties>
+    <netbeans.version>RELEASE122</netbeans.version>
+  </properties>
+
+  <dependencies>
+    <!--  NotNull/Nullable annotations  -->
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>13.0</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.netbeans.utilities</groupId>
+        <artifactId>nbm-maven-plugin</artifactId>
+        <version>4.5</version>
+        <extensions>true</extensions>
+        <configuration>
+          <requiresRestart>true</requiresRestart>
+          <useOSGiDependencies>true</useOSGiDependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -1,0 +1,43 @@
+
+#	Allgemeine Ignores
+
+*.ipr
+*.iml
+*.iws
+/.idea/*
+!/.idea/fileTemplates/
+!/.idea/inspectionProfiles/
+!/.idea/runConfigurations/
+!/.idea/codeStyleSettings.xml
+!/.idea/projectCodeStyle.xml
+!/.idea/vcs.xml
+
+
+#	Target Ignores
+**/target/
+
+# Ignores zu AsciiDoc
+/docs/**/.asciidoctor/
+/docs/**/diag-*.png
+
+
+#	Benutzerdefinierte Ignores
+
+/temp/
+/.misc/
+/_misc/
+/misc/
+serverlicense.jar
+derby.log
+vaadin_desktop_GWT.xml
+rebel.xml
+.rebel.xml.bak
+adito.properties
+
+
+# shade-plugin dependency file
+
+dependency-reduced-pom.xml
+
+/modules/nb-patches/*/target/
+/neon/**/target/
