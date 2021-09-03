@@ -1,13 +1,16 @@
 package de.adito.aditoweb.nbm.metrics.impl.registry;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.prometheus.client.Collector;
 import io.prometheus.client.dropwizard.DropwizardExports;
+import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
 import io.prometheus.client.exporter.*;
 import org.jetbrains.annotations.NotNull;
 import org.openide.modules.OnStart;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.logging.*;
 
@@ -37,7 +40,7 @@ class ADITOMetricRegistryExporter implements Runnable
     {
       PushGateway gateway = new PushGateway(_ADITOEndpoint._URL);
       gateway.setConnectionFactory(new _ADITOEndpoint());
-      gateway.pushAdd(new DropwizardExports(registryProvider.getRegistry()), _ADITOEndpoint._JOB_NAME);
+      gateway.pushAdd(new DropwizardExports(registryProvider.getRegistry(), new _ADITOSampleBuilder()), _ADITOEndpoint._JOB_NAME);
     }
     catch (Exception e)
     {
@@ -83,6 +86,22 @@ class ADITOMetricRegistryExporter implements Runnable
       HttpURLConnection url = (HttpURLConnection) new URL(pURL).openConnection();
       url.setAuthenticator(this);
       return url;
+    }
+  }
+
+  /**
+   * SampleBuilder that will add the adito prefix to the dropwizard metric name
+   */
+  private static class _ADITOSampleBuilder extends DefaultSampleBuilder
+  {
+    private static final String _PREFIX = "designer.";
+
+    @Override
+    public Collector.MetricFamilySamples.Sample createSample(String dropwizardName, String nameSuffix, List<String> additionalLabelNames,
+                                                             List<String> additionalLabelValues, double value)
+    {
+      dropwizardName = _PREFIX + dropwizardName;
+      return super.createSample(dropwizardName, nameSuffix, additionalLabelNames, additionalLabelValues, value);
     }
   }
 }
