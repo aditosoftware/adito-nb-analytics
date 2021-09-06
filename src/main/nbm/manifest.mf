@@ -28,6 +28,6 @@ OpenIDE-Module-Module-Dependencies: de.adito.aditoweb.modules.nbide.nb
  7, org.openide.nodes > 7.55, org.openide.modules > 7.58, org.openide.
  awt > 7.78, org.netbeans.modules.projectapi/1 > 1.78, org.netbeans.mo
  dules.projectuiapi.base/1 > 1.95.0.9, org.openide.util.ui > 9.18, org
- .netbeans.swing.outline > 1.44, rxjava > 3.0.4, de.adito.util.reactiv
- e > 1.1.4, com.google.guava > 29.0.0, de.adito.picoservice.picoservic
- e > 1.1.6
+ .netbeans.swing.outline > 1.44, org.openide.dialogs > 7.52,
+ rxjava > 3.0.4, de.adito.util.reactive > 1.1.4, com.google.guava > 29.
+ 0.0, de.adito.picoservice.picoservice > 1.1.6

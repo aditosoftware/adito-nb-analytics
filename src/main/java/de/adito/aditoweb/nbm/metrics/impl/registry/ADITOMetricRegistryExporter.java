@@ -2,12 +2,16 @@ package de.adito.aditoweb.nbm.metrics.impl.registry;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.adito.aditoweb.nbm.metrics.impl.InstallationID;
+import de.adito.aditoweb.nbm.metrics.impl.user.IUserAgreement;
 import io.prometheus.client.Collector;
 import io.prometheus.client.dropwizard.DropwizardExports;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
 import io.prometheus.client.exporter.*;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
-import org.openide.modules.OnStart;
+import org.openide.modules.OnStop;
+import org.openide.windows.OnShowing;
 
 import java.io.IOException;
 import java.net.*;
@@ -22,48 +26,163 @@ import java.util.logging.*;
  */
 // Gets called on designer start automatically by MetricRegistryExporterSTarter
 @SuppressWarnings("unused")
-class ADITOMetricRegistryExporter implements Runnable
+class ADITOMetricRegistryExporter
 {
-
   private static final Logger _LOGGER = Logger.getLogger(ADITOMetricRegistryExporter.class.getName());
   private static final long _INTERVAL_MS = Long.parseLong(System.getProperty("adito.metrics.exporter.prometheus.push.interval", "30000"));
+  private static final ScheduledExecutorService _SENDING_SERVICE = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+                                                                                                                  .setNameFormat("tMetricExporter-%d")
+                                                                                                                  .setDaemon(true)
+                                                                                                                  .setPriority(Thread.MIN_PRIORITY)
+                                                                                                                  .build());
+  private static ADITOMetricRegistryExporter _INSTANCE;
   private final IMetricRegistryProvider registryProvider;
+  private ScheduledFuture<?> task;
+  private Disposable analyticsAllowedDisposable;
 
-  public ADITOMetricRegistryExporter(@NotNull IMetricRegistryProvider pRegistryProvider)
+  /**
+   * @return the singleton instance
+   */
+  @NotNull
+  public static ADITOMetricRegistryExporter getInstance()
   {
-    registryProvider = pRegistryProvider;
+    if (_INSTANCE == null)
+      _INSTANCE = new ADITOMetricRegistryExporter(IMetricRegistryProvider.getDefault());
+    return _INSTANCE;
   }
 
-  @Override
-  public void run()
+  private ADITOMetricRegistryExporter(@NotNull IMetricRegistryProvider pRegistryProvider)
+  {
+    registryProvider = pRegistryProvider;
+
+    // Log everything because of INFO level
+    _LOGGER.setLevel(Level.ALL);
+  }
+
+  /**
+   * Gets called if the module containing the exporter was started.
+   */
+  protected synchronized void onModuleStart()
+  {
+    // init observable to observe analytics state
+    // will start automatically, if we should - because the observable triggers it
+    if (analyticsAllowedDisposable == null)
+      analyticsAllowedDisposable = IUserAgreement.getInstance().sendingAnalyticsAllowed()
+          .subscribeOn(Schedulers.computation())
+          .observeOn(Schedulers.computation())
+          .distinctUntilChanged()
+          .subscribe(pAllowed -> {
+            if (!pAllowed)
+              _stopTransmitting();
+            else
+              _startTransmitting();
+          });
+  }
+
+  /**
+   * Gets called if the module containing the exporter was stopped (shutdown).
+   * Be careful, a module can be restarted again!
+   */
+  protected synchronized void onModuleStop()
+  {
+    // stop if started
+    _stopTransmitting();
+
+    // dispose analytics observable, because the module got uninstalled
+    if (analyticsAllowedDisposable != null && !analyticsAllowedDisposable.isDisposed())
+    {
+      analyticsAllowedDisposable.dispose();
+      analyticsAllowedDisposable = null;
+    }
+  }
+
+  /**
+   * Starts the transmitting service, if not already started
+   */
+  private synchronized void _startTransmitting()
   {
     try
     {
-      PushGateway gateway = new PushGateway(new URL(_ADITOEndpoint._URL));
-      gateway.setConnectionFactory(new _ADITOEndpoint());
-      gateway.pushAdd(new DropwizardExports(registryProvider.getRegistry(), new _ADITOSampleBuilder()), _ADITOEndpoint._JOB_NAME);
+      if (task == null)
+      {
+        // Create gateway
+        PushGateway gateway = new PushGateway(new URL(_ADITOEndpoint._URL));
+        gateway.setConnectionFactory(new _ADITOEndpoint());
+        task = _SENDING_SERVICE.scheduleWithFixedDelay(new _GatewaySender(gateway, registryProvider), 0, _INTERVAL_MS, TimeUnit.MILLISECONDS);
+
+        // Log sending
+        _LOGGER.info("Usage statistics and analytics service started. Transmitting data to " + _ADITOEndpoint._URL);
+      }
     }
     catch (Exception e)
     {
-      _LOGGER.log(Level.WARNING, "Failed to transport metrics to gateway", e);
+      _LOGGER.log(Level.WARNING, "Failed to initiate metric gateway", e);
+    }
+  }
+
+  /**
+   * Stops the transmitting service, if started
+   */
+  private synchronized void _stopTransmitting()
+  {
+    if (task != null)
+    {
+      task.cancel(true);
+      task = null;
     }
   }
 
   /**
    * Gets called on designer start automatically
    */
-  @OnStart
+  @OnShowing
   public static class MetricRegistryExporterStarter implements Runnable
   {
     @Override
     public void run()
     {
-      Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-                                                     .setNameFormat("tMetricExporter-%d")
-                                                     .setDaemon(true)
-                                                     .setPriority(Thread.MIN_PRIORITY)
-                                                     .build())
-          .scheduleAtFixedRate(new ADITOMetricRegistryExporter(IMetricRegistryProvider.getDefault()), 0, _INTERVAL_MS, TimeUnit.MILLISECONDS);
+      ADITOMetricRegistryExporter.getInstance().onModuleStart();
+    }
+  }
+
+  /**
+   * Gets called on designer shutdown automatically
+   */
+  @OnStop
+  public static class MetricRegistryExporterStopper implements Runnable
+  {
+    @Override
+    public void run()
+    {
+      ADITOMetricRegistryExporter.getInstance().onModuleStop();
+    }
+  }
+
+  /**
+   * Runnable that gets executed asynchronously and triggers the "send"
+   */
+  private static class _GatewaySender implements Runnable
+  {
+    private final PushGateway gateway;
+    private final IMetricRegistryProvider registryProvider;
+
+    public _GatewaySender(@NotNull PushGateway pGateway, @NotNull IMetricRegistryProvider pRegistryProvider)
+    {
+      gateway = pGateway;
+      registryProvider = pRegistryProvider;
+    }
+
+    @Override
+    public void run()
+    {
+      try
+      {
+        gateway.pushAdd(new DropwizardExports(registryProvider.getRegistry(), new _ADITOSampleBuilder()), _ADITOEndpoint._JOB_NAME);
+      }
+      catch (Exception e)
+      {
+        _LOGGER.log(Level.WARNING, "Failed to transport metrics to gateway", e);
+      }
     }
   }
 
