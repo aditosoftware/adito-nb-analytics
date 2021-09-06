@@ -203,6 +203,8 @@
         <extensions>true</extensions>
         <configuration>
           <requiresRestart>true</requiresRestart>
+
+          <!-- We "hacked" the dependencies ourself, because we want to deliver specific dependencies bundled with this plugin. -->
           <useOSGiDependencies>true</useOSGiDependencies>
         </configuration>
       </plugin>
