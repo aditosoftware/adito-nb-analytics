@@ -1,6 +1,7 @@
 package de.adito.aditoweb.nbm.metrics.impl.registry;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import de.adito.aditoweb.nbm.metrics.impl.InstallationID;
 import io.prometheus.client.Collector;
 import io.prometheus.client.dropwizard.DropwizardExports;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
@@ -10,7 +11,7 @@ import org.openide.modules.OnStart;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 
@@ -38,7 +39,7 @@ class ADITOMetricRegistryExporter implements Runnable
   {
     try
     {
-      PushGateway gateway = new PushGateway(_ADITOEndpoint._URL);
+      PushGateway gateway = new PushGateway(new URL(_ADITOEndpoint._URL));
       gateway.setConnectionFactory(new _ADITOEndpoint());
       gateway.pushAdd(new DropwizardExports(registryProvider.getRegistry(), new _ADITOSampleBuilder()), _ADITOEndpoint._JOB_NAME);
     }
@@ -90,17 +91,30 @@ class ADITOMetricRegistryExporter implements Runnable
   }
 
   /**
-   * SampleBuilder that will add the adito prefix to the dropwizard metric name
+   * SampleBuilder that will add the adito prefix to the
+   * dropwizard metric name and includes the installation ID as label
    */
   private static class _ADITOSampleBuilder extends DefaultSampleBuilder
   {
     private static final String _PREFIX = "designer.";
+    private static final String _VERSIONID_LABEL_NAME = "installID";
 
     @Override
     public Collector.MetricFamilySamples.Sample createSample(String dropwizardName, String nameSuffix, List<String> additionalLabelNames,
                                                              List<String> additionalLabelValues, double value)
     {
+      // include prefix in metric name
       dropwizardName = _PREFIX + dropwizardName;
+
+      // add designer installation id
+      additionalLabelNames = additionalLabelNames == null ? new ArrayList<>() : new ArrayList<>(additionalLabelNames);
+      additionalLabelValues = additionalLabelValues == null ? new ArrayList<>() : new ArrayList<>(additionalLabelValues);
+      if (!additionalLabelNames.contains(_VERSIONID_LABEL_NAME))
+      {
+        additionalLabelNames.add(_VERSIONID_LABEL_NAME);
+        additionalLabelValues.add(InstallationID.get().asText());
+      }
+
       return super.createSample(dropwizardName, nameSuffix, additionalLabelNames, additionalLabelValues, value);
     }
   }
