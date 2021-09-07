@@ -35,7 +35,7 @@
     <dependency>
       <groupId>de.adito.nbm</groupId>
       <artifactId>de-adito-metrics-api</artifactId>
-      <version>${netbeans.version}-1.6.0-SNAPSHOT</version>
+      <version>${netbeans.version}-1.6.0-1</version>
     </dependency>
 
     <!-- Dropwizard Metrics-Dependency as base framework -->
