@@ -74,6 +74,13 @@
       <version>3.2</version>
     </dependency>
 
+    <!-- TableLayout -->
+    <dependency>
+      <groupId>info.clearthought</groupId>
+      <artifactId>table-layout</artifactId>
+      <version>4.2.1</version>
+    </dependency>
+
     <!-- NetBeans -->
     <dependency>
       <groupId>org.netbeans.api</groupId>
