@@ -29,4 +29,20 @@ public interface IUserAgreement
   @NotNull
   Observable<Boolean> sendingAnalyticsAllowed();
 
+  /**
+   * @return a mutable instance
+   */
+  @NotNull
+  IMutableUserAgreement getMutable();
+
+  interface IMutableUserAgreement extends IUserAgreement
+  {
+    /**
+     * Sets, if the user has agreed to send analytics
+     *
+     * @param pAgreed true, if agreed
+     */
+    void setSendingAnalyticsAllowed(boolean pAgreed);
+  }
+
 }

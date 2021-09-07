@@ -13,7 +13,7 @@ import java.util.prefs.Preferences;
 /**
  * @author w.glanzer, 06.09.2021
  */
-class UserAgreement implements IUserAgreement
+class UserAgreement implements IUserAgreement.IMutableUserAgreement
 {
   private static final String _USER_AGREEMENT = "adito.designer.analytics.agreement.ok";
   protected static final UserAgreement INSTANCE = new UserAgreement();
@@ -27,6 +27,19 @@ class UserAgreement implements IUserAgreement
   public Observable<Boolean> sendingAnalyticsAllowed()
   {
     return observableCache.calculate("sendingAnalyticsAllowed", () -> hasAgreedSendingAnalytics);
+  }
+
+  @NotNull
+  @Override
+  public IMutableUserAgreement getMutable()
+  {
+    return this;
+  }
+
+  @Override
+  public void setSendingAnalyticsAllowed(boolean pAllowed)
+  {
+    hasAgreedSendingAnalytics.onNext(pAllowed);
   }
 
   /**
@@ -51,16 +64,6 @@ class UserAgreement implements IUserAgreement
   }
 
   /**
-   * Sets, if the user has agreed to send analytics
-   *
-   * @param pAgreed true, if agreed
-   */
-  protected void setHasAgreedSendingAnalytics(boolean pAgreed)
-  {
-    hasAgreedSendingAnalytics.onNext(pAgreed);
-  }
-
-  /**
    * Initializes the userAgreement object.
    * It may block until the user decided to aggee / disagree.
    */
@@ -68,7 +71,7 @@ class UserAgreement implements IUserAgreement
   {
     if (prefs.get(_USER_AGREEMENT, "").trim().isEmpty())
       prefs.putBoolean(_USER_AGREEMENT, _askAgreeSendingAnalytics_Blocking());
-    setHasAgreedSendingAnalytics(prefs.getBoolean(_USER_AGREEMENT, false));
+    setSendingAnalyticsAllowed(prefs.getBoolean(_USER_AGREEMENT, false));
   }
 
   /**
@@ -79,7 +82,8 @@ class UserAgreement implements IUserAgreement
   private boolean _askAgreeSendingAnalytics_Blocking()
   {
     String aggreeOption = NbBundle.getMessage(UserAgreement.class, "Title_AgreeOption");
-    DialogDescriptor descriptor = new DialogDescriptor(NbBundle.getMessage(UserAgreement.class, "TXT_AnalyticsAgreement"),
+    DialogDescriptor descriptor = new DialogDescriptor(NbBundle.getMessage(UserAgreement.class, "TXT_AnalyticsAgreement") +
+                                                           NbBundle.getMessage(UserAgreement.class, "TXT_AnalyticsAgreement_showMore"),
                                                        NbBundle.getMessage(UserAgreement.class, "Title_AnalyticsAgreement"),
                                                        true, new Object[]{aggreeOption, NbBundle.getMessage(UserAgreement.class, "Title_DeclineOption")},
                                                        aggreeOption, DialogDescriptor.DEFAULT_ALIGN, null, null);
