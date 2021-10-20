@@ -26,7 +26,7 @@ class HistogramMetricHandler extends AbstractAsyncCodahaleMetricHandler<Histogra
                               @Nullable Object pResult)
   {
     if (pResult instanceof Number)
-      getRegistry().histogram(getMetricName(pAnnotation.name(), pMethod)).update(((Number) pResult).longValue());
+      getRegistry().histogram(getMetricName(pAnnotation.name(), pAnnotation.nameFactory(), pMethod, pArgs)).update(((Number) pResult).longValue());
     else
       throw new IllegalStateException("Method " + pMethod.getName() + " in class " + pMethod.getDeclaringClass().getName() +
                                           " was annoted with @Histogram, but did not return a valid histogram datatype (" + pObject + ")");

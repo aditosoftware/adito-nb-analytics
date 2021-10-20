@@ -41,7 +41,8 @@ class SampledMetricHandler extends AbstractAsyncCodahaleMetricHandler<Sampled>
         labels.put(argName, argValue);
     }
 
-    ((MultiValueGauge) getRegistry().gauge(getMetricName(pAnnotation.name(), pMethod), () -> new MultiValueGauge(true))).addValue(labels, System.currentTimeMillis());
+    ((MultiValueGauge) getRegistry().gauge(getMetricName(pAnnotation.name(), pAnnotation.nameFactory(), pMethod, pArgs), () -> new MultiValueGauge(true)))
+        .addValue(labels, System.currentTimeMillis());
   }
 
   @Override

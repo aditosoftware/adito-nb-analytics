@@ -18,7 +18,7 @@ class CountedMetricHandler extends AbstractAsyncCodahaleMetricHandler<Counted>
   @Override
   protected void beforeMethod0(@NotNull Counted pAnnotation, @NotNull Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs)
   {
-    getRegistry().counter(getMetricName(pAnnotation.name(), pMethod)).inc();
+    getRegistry().counter(getMetricName(pAnnotation.name(), pAnnotation.nameFactory(), pMethod, pArgs)).inc();
   }
 
   @Override

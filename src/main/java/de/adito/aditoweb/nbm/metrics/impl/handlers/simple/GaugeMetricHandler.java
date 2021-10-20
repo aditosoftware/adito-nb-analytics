@@ -26,7 +26,7 @@ class GaugeMetricHandler extends AbstractAsyncCodahaleMetricHandler<Gauge>
   protected void afterMethod0(@NotNull Gauge pAnnotation, @NotNull Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs,
                               @Nullable Object pResult)
   {
-    ((_SimpleValueGauge) getRegistry().gauge(getMetricName(pAnnotation.name(), pMethod), _SimpleValueGauge::new)).setValue(pResult);
+    ((_SimpleValueGauge) getRegistry().gauge(getMetricName(pAnnotation.name(), pAnnotation.nameFactory(), pMethod, pArgs), _SimpleValueGauge::new)).setValue(pResult);
   }
 
   /**
