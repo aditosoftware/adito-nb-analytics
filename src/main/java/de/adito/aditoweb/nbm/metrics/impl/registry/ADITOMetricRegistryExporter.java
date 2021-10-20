@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.adito.aditoweb.nbm.metrics.impl.InstallationID;
 import de.adito.aditoweb.nbm.metrics.impl.user.IUserAgreement;
 import io.prometheus.client.Collector;
-import io.prometheus.client.dropwizard.DropwizardExports;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
 import io.prometheus.client.exporter.*;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -177,7 +176,7 @@ class ADITOMetricRegistryExporter
     {
       try
       {
-        gateway.pushAdd(new DropwizardExports(registryProvider.getRegistry(), new _ADITOSampleBuilder()), _ADITOEndpoint._JOB_NAME);
+        gateway.pushAdd(new ADITODropwizardExports(registryProvider.getRegistry(), new _ADITOSampleBuilder()), _ADITOEndpoint._JOB_NAME);
       }
       catch (Exception e)
       {
