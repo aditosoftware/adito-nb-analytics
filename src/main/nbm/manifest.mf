@@ -2,7 +2,15 @@ Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: true
 OpenIDE-Module-Name: Analytics and Usage Statistics
 OpenIDE-Module-Display-Category: ADITO / Analytics
-OpenIDE-Module-Long-Description: Collector for anonymous usage statistics
+OpenIDE-Module-Long-Description: Collects common platform analytics and anonymous usage statistics.
+ This data is send to ADITO, to improve the overall stability of the ADITO Designer at runtime.
+  <p style="font-weight: bold;">Changelog</p>
+  <p style="font-weight: bold;">v1.0.2</p>
+  <p style="margin-left: 10px; font-weight: bold;">MINOR</p>
+  <ul>
+    <li>Added new metric type 'Sampled' to track specific method invocations (used in exception tracking)</li>
+    <li>Added 'nameFactory' to annotations to generate the metric name more dynamic (used in exception tracking)</li>
+  </ul>
 OpenIDE-Module-Short-Description: Collects common platform analytics and anonymous usage statistics.
  This data is send to ADITO, to improve the overall stability of the ADITO Designer at runtime.
 X-Class-Path: ext/de.adito.aditoweb.nbm.analytics/de-adito-nb-modules/
