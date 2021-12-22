@@ -29,6 +29,7 @@ class ADITOMetricRegistryExporter
 {
   private static final Logger _LOGGER = Logger.getLogger(ADITOMetricRegistryExporter.class.getName());
   private static final long _INTERVAL_MS = Long.parseLong(System.getProperty("adito.metrics.exporter.prometheus.push.interval", "30000"));
+  private static final boolean _LOG_ENABLED = System.getProperty("adito.metrics.exporter.log") != null;
   private static final ScheduledExecutorService _SENDING_SERVICE = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                                                                                                                   .setNameFormat("tMetricExporter-%d")
                                                                                                                   .setDaemon(true)
@@ -55,7 +56,8 @@ class ADITOMetricRegistryExporter
     registryProvider = pRegistryProvider;
 
     // Log everything because of INFO level
-    _LOGGER.setLevel(Level.ALL);
+    if (_LOG_ENABLED)
+      _LOGGER.setLevel(Level.ALL);
   }
 
   /**
@@ -110,12 +112,14 @@ class ADITOMetricRegistryExporter
         task = _SENDING_SERVICE.scheduleWithFixedDelay(new _GatewaySender(gateway, registryProvider), 0, _INTERVAL_MS, TimeUnit.MILLISECONDS);
 
         // Log sending
-        _LOGGER.info("Usage statistics and analytics service started. Transmitting data to " + _ADITOEndpoint._URL);
+        if (_LOG_ENABLED)
+          _LOGGER.info("Usage statistics and analytics service started. Transmitting data to " + _ADITOEndpoint._URL);
       }
     }
     catch (Exception e)
     {
-      _LOGGER.log(Level.WARNING, "Failed to initiate metric gateway", e);
+      if (_LOG_ENABLED)
+        _LOGGER.log(Level.WARNING, "Failed to initiate metric gateway", e);
     }
   }
 
@@ -180,7 +184,8 @@ class ADITOMetricRegistryExporter
       }
       catch (Exception e)
       {
-        _LOGGER.log(Level.WARNING, "Failed to transport metrics to gateway", e);
+        if (_LOG_ENABLED)
+          _LOGGER.log(Level.WARNING, "Failed to transport metrics to gateway", e);
       }
     }
   }
