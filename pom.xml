@@ -24,6 +24,13 @@
       <version>1.9.1-SNAPSHOT</version>
     </dependency>
 
+    <!-- Sentry -->
+    <dependency>
+      <groupId>io.sentry</groupId>
+      <artifactId>sentry</artifactId>
+      <version>6.1.2</version>
+    </dependency>
+
     <!-- ADITO Utilities for NetBeans -->
     <dependency>
       <groupId>de.adito.nb-modules</groupId>
