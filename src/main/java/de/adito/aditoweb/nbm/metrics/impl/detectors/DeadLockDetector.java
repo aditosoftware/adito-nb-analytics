@@ -1,7 +1,6 @@
 package de.adito.aditoweb.nbm.metrics.impl.detectors;
 
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.metrics.IDeadlockDetector;
-import io.reactivex.rxjava3.disposables.Disposable;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.util.*;
@@ -17,7 +16,8 @@ public class DeadLockDetector extends ARunnableDetector implements IDeadlockDete
   static final Set<String> SYSTEM_THREADS = Set.of("File Watcher", "W32 File Monitor", "Signal Dispatcher", "Finalizer", "Sweeper thread",
                                                    "Common-Cleaner", "Service Thread", "Active Reference Queue Daemon", "CLI Requests Server",
                                                    "Java2D Disposer", "AWT-Shutdown", "FelixDispatchQueue", "FelixFrameworkWiring", "TimerQueue",
-                                                   "Swing-Shell", "FelixStartLevel", "ReferenceQueueThread", "Batik CleanerThread");
+                                                   "Swing-Shell", "FelixStartLevel", "ReferenceQueueThread", "Batik CleanerThread",
+                                                   "tRestartTimer");
   static final List<String> MONITORED_CLASS_INFIXES = List.of(".nbm.", ".adito.", ".rxjava.");
   static final Logger LOGGER = Logger.getLogger(DeadLockDetector.class.getName());
 
