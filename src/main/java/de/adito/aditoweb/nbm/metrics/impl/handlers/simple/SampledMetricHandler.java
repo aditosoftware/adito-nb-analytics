@@ -2,6 +2,7 @@ package de.adito.aditoweb.nbm.metrics.impl.handlers.simple;
 
 import com.google.common.cache.*;
 import de.adito.aditoweb.nbm.metrics.api.types.Sampled;
+import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
 import de.adito.aditoweb.nbm.metrics.impl.handlers.*;
 import org.jetbrains.annotations.*;
 
@@ -41,8 +42,21 @@ class SampledMetricHandler extends AbstractAsyncCodahaleMetricHandler<Sampled>
         labels.put(argName, argValue);
     }
 
-    ((MultiValueGauge) getRegistry().gauge(getMetricName(pAnnotation.name(), pAnnotation.nameFactory(), pMethod, pArgs), () -> new MultiValueGauge(true)))
-        .addValue(labels, System.currentTimeMillis());
+    // Log Exceptions to external, if possible
+    boolean wasHandled = false;
+    for (Object arg : pArgs)
+    {
+      if (arg instanceof Throwable)
+      {
+        IEventLogger.getInstance().captureRegularException((Throwable) arg);
+        wasHandled = true;
+      }
+    }
+
+    // if not handled by eventlogger, export it to metric registry
+    if (!wasHandled)
+      ((MultiValueGauge) getRegistry().gauge(getMetricName(pAnnotation.name(), pAnnotation.nameFactory(), pMethod, pArgs), () -> new MultiValueGauge(true)))
+          .addValue(labels, System.currentTimeMillis());
   }
 
   @Override

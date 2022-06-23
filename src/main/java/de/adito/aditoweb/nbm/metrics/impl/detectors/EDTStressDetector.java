@@ -2,6 +2,7 @@ package de.adito.aditoweb.nbm.metrics.impl.detectors;
 
 import de.adito.aditoweb.nbm.metrics.api.IMetricProxyFactory;
 import de.adito.aditoweb.nbm.metrics.api.types.*;
+import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.metrics.IEDTStressDetector;
 
 import java.lang.management.*;
@@ -71,8 +72,9 @@ public class EDTStressDetector extends ARunnableDetector implements IEDTStressDe
         metricsProxy.logStress(maxPercentage);
         if (maxPercentage > STRESS_PERCENTAGE)
         {
-          metricsProxy.logStressException(
-              new EDTStressException(ThreadUtility.getThreadInfoStacktrace(threadBean.getThreadInfo(edtID, Integer.MAX_VALUE))));
+          ThreadInfo threadInfo = threadBean.getThreadInfo(edtID, Integer.MAX_VALUE);
+          metricsProxy.logStressException(new EDTStressException(ThreadUtility.getThreadInfoStacktrace(threadInfo)));
+          IEventLogger.getInstance().captureEDTStress(threadInfo);
         }
       }
 

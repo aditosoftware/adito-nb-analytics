@@ -3,12 +3,9 @@ package de.adito.aditoweb.nbm.metrics.impl.detectors;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 
-import javax.management.openmbean.*;
-import java.lang.management.ThreadInfo;
-import java.util.Collection;
 import java.util.concurrent.*;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author m.kaspera, 16.12.2021
@@ -68,7 +65,7 @@ class DeadLockDetectorRunnerTest
       pE.printStackTrace();
     }
     spy.run();
-    verify(spy, Mockito.times(1)).getThreaddump();
+    verify(spy, Mockito.times(1)).logDeadLock(Mockito.any(), Mockito.any());
     thread1.interrupt();
     thread2.interrupt();
   }
@@ -120,7 +117,7 @@ class DeadLockDetectorRunnerTest
       pE.printStackTrace();
     }
     spy.run();
-    verify(spy, Mockito.times(1)).getThreaddump();
+    verify(spy, Mockito.times(1)).logDeadLock(Mockito.any(), Mockito.any());
     thread1.interrupt();
     thread2.interrupt();
   }
@@ -140,6 +137,6 @@ class DeadLockDetectorRunnerTest
       pE.printStackTrace();
     }
     spy.run();
-    verify(spy, Mockito.times(0)).getThreaddump();
+    verify(spy, Mockito.times(0)).logDeadLock(Mockito.any(), Mockito.any());
   }
 }

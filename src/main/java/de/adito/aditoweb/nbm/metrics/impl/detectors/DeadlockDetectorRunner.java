@@ -1,14 +1,14 @@
 package de.adito.aditoweb.nbm.metrics.impl.detectors;
 
 import com.google.common.cache.*;
-import de.adito.aditoweb.nbm.metrics.api.IMetricProxyFactory;
-import de.adito.aditoweb.nbm.metrics.api.types.Sampled;
-import org.jetbrains.annotations.*;
+import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.*;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * @author m.kaspera, 17.12.2021
@@ -20,13 +20,11 @@ class DeadlockDetectorRunner implements Runnable
   private final Cache<StacktraceKey, StackTraceElement[]> stackTraceCache = CacheBuilder.newBuilder().build();
   private final Set<Long> systemThreads = new HashSet<>();
   private final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-  private DeadlockDetectorRunner metricProxy;
+  private Set<String> lastDeadlockedThreads = Set.of();
 
   @Override
   public void run()
   {
-    if (metricProxy == null)
-      metricProxy = IMetricProxyFactory.proxy(this);
     try
     {
       long runnerThreadId = Thread.currentThread().getId();
@@ -43,8 +41,7 @@ class DeadlockDetectorRunner implements Runnable
       // if the list of deadlockedThreads contains entries deadlock(s) were detected -> go and log them in combination with a complete threaddump
       if (!deadlockedThreads.isEmpty())
       {
-        ThreadInfo[] threadInfos = getThreaddump();
-        metricProxy.logDeadLock(deadlockedThreads, threadInfos);
+        logDeadLock(deadlockedThreads, threadMXBean.dumpAllThreads(true, true));
       }
     }
     // catch all exceptions since the deadlock detection thread should continue operating, except if it is cancelled
@@ -59,7 +56,7 @@ class DeadlockDetectorRunner implements Runnable
    * @param pCurrentThreadId   thread id to check for a potential deadlock
    * @throws ExecutionException if an exception is thrown when loading an entry of the stackTraceCache
    */
-  void checkForDeadlock(@NotNull List<ThreadInfo> pDeadlockedThreads, long pCurrentThreadId) throws ExecutionException
+  private void checkForDeadlock(@NotNull List<ThreadInfo> pDeadlockedThreads, long pCurrentThreadId) throws ExecutionException
   {
     Long lastCPUTime = lastCPUTimeMap.getOrDefault(pCurrentThreadId, -1L);
     long currentThreadTime = threadMXBean.getThreadCpuTime(pCurrentThreadId);
@@ -67,7 +64,7 @@ class DeadlockDetectorRunner implements Runnable
     if (currentThreadTime == lastCPUTime)
     {
       ThreadInfo currentThreadInfo = threadMXBean.getThreadInfo(pCurrentThreadId, Integer.MAX_VALUE);
-      if (isDeadlockedThread(currentThreadInfo, pCurrentThreadId, currentThreadTime))
+      if (currentThreadInfo != null && isDeadlockedThread(currentThreadInfo, pCurrentThreadId, currentThreadTime))
       {
         pDeadlockedThreads.add(currentThreadInfo);
       }
@@ -85,7 +82,7 @@ class DeadlockDetectorRunner implements Runnable
    * @return true if the thread should be considered deadlocked, false otherwise
    * @throws ExecutionException if an exception is thrown when loading an entry of the stackTraceCache
    */
-  boolean isDeadlockedThread(@NotNull ThreadInfo pCurrentThreadInfo, long pCurrentThreadId, long pCurrentThreadTime) throws ExecutionException
+  private boolean isDeadlockedThread(@NotNull ThreadInfo pCurrentThreadInfo, long pCurrentThreadId, long pCurrentThreadTime) throws ExecutionException
   {
     if (!DeadLockDetector.SYSTEM_THREADS.contains(pCurrentThreadInfo.getThreadName()))
     {
@@ -107,16 +104,21 @@ class DeadlockDetectorRunner implements Runnable
     return false;
   }
 
-  ThreadInfo[] getThreaddump()
+  void logDeadLock(@NotNull List<ThreadInfo> pDeadLockedThreads, @NotNull ThreadInfo[] pAllThreadInfos)
   {
-    return threadMXBean.dumpAllThreads(true, true);
-  }
+    Set<String> currentDeadlockedThreadNames = pDeadLockedThreads.stream()
+        .map(ThreadInfo::getThreadName)
+        .collect(Collectors.toSet());
 
-  @Sampled(name = "DeadlockDetector", argumentConverter = ArgumentConverter.class)
-  public void logDeadLock(@NotNull List<ThreadInfo> pDeadLockedThreads, @NotNull ThreadInfo[] pAllThreadInfos)
-  {
-    DeadLockDetector.LOGGER.log(Level.SEVERE, "Deadlock detected:\n" + ThreadUtility.getDeadlockedThreadsAsString(pDeadLockedThreads) + "\nThreaddump:\n"
-        + ThreadUtility.getThreadDump(pAllThreadInfos));
+    try
+    {
+      if (!Objects.equals(lastDeadlockedThreads, currentDeadlockedThreadNames))
+        IEventLogger.getInstance().captureThreadDeadlock(pDeadLockedThreads, pAllThreadInfos);
+    }
+    finally
+    {
+      lastDeadlockedThreads = currentDeadlockedThreadNames;
+    }
   }
 
   private boolean isMonitoredClass(@NotNull String pClassName)
@@ -127,24 +129,5 @@ class DeadlockDetectorRunner implements Runnable
         return true;
     }
     return false;
-  }
-
-  private static class ArgumentConverter implements Sampled.IArgumentConverter
-  {
-
-    @Nullable
-    @Override
-    public String toString(@Nullable Object pArgumentValue)
-    {
-      if (pArgumentValue instanceof ThreadInfo[])
-      {
-        return ThreadUtility.getThreadDump((ThreadInfo[]) pArgumentValue);
-      }
-      else if (pArgumentValue instanceof List)
-      {
-        return ThreadUtility.getDeadlockedThreadsAsString((List<?>) pArgumentValue);
-      }
-      return null;
-    }
   }
 }
