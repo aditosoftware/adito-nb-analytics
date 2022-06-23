@@ -1,9 +1,10 @@
 package de.adito.aditoweb.nbm.metrics.impl.detectors;
 
 import de.adito.aditoweb.nbm.metrics.api.IMetricProxyFactory;
-import de.adito.aditoweb.nbm.metrics.api.types.*;
+import de.adito.aditoweb.nbm.metrics.api.types.Histogram;
 import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
 import de.adito.aditoweb.nbm.nbide.nbaditointerface.metrics.IEDTStressDetector;
+import org.openide.util.lookup.ServiceProvider;
 
 import java.lang.management.*;
 import java.util.Arrays;
@@ -12,6 +13,7 @@ import java.util.logging.Logger;
 /**
  * @author m.kaspera, 20.12.2021
  */
+@ServiceProvider(service = IEDTStressDetector.class)
 public class EDTStressDetector extends ARunnableDetector implements IEDTStressDetector
 {
 
