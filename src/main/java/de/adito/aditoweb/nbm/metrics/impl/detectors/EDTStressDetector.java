@@ -53,6 +53,7 @@ public class EDTStressDetector extends ARunnableDetector implements IEDTStressDe
         .findFirst()
         .orElseThrow();
     private _Executor metricsProxy;
+    private boolean lastThresholdExceeded = false;
 
     @Override
     public void run()
@@ -70,12 +71,10 @@ public class EDTStressDetector extends ARunnableDetector implements IEDTStressDe
 
         long maxPercentage = Math.max(diffPercentage, userDiffPercentage);
         metricsProxy.logStress(maxPercentage);
-        if (maxPercentage > STRESS_PERCENTAGE)
-        {
-          ThreadInfo threadInfo = threadBean.getThreadInfo(edtID, Integer.MAX_VALUE);
-          metricsProxy.logStressException(new EDTStressException(ThreadUtility.getThreadInfoStacktrace(threadInfo)));
-          IEventLogger.getInstance().captureEDTStress(threadInfo);
-        }
+
+        if (maxPercentage > STRESS_PERCENTAGE && !lastThresholdExceeded)
+          IEventLogger.getInstance().captureEDTStress(threadBean.getThreadInfo(edtID, Integer.MAX_VALUE), threadBean.dumpAllThreads(true, true));
+        lastThresholdExceeded = maxPercentage > STRESS_PERCENTAGE;
       }
 
       lastEDTCPUTime = edtCPUTime;
@@ -86,12 +85,6 @@ public class EDTStressDetector extends ARunnableDetector implements IEDTStressDe
     private double logStress(double pStressPercentage)
     {
       return pStressPercentage;
-    }
-
-    @Sampled(name = "EDTStressException")
-    private void logStressException(Exception pEx)
-    {
-      //nix
     }
   }
 
