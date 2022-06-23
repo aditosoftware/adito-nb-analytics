@@ -23,10 +23,10 @@ public abstract class ARunnableDetector implements IRunnableDetector, Disposable
     {
       ManagementFactory.getThreadMXBean().setThreadCpuTimeEnabled(true);
       scheduledFuture = Executors.newScheduledThreadPool(1, new ThreadFactoryBuilder()
-          .setNameFormat(getThreadNameFormat())
-          .setDaemon(true)
-          .build())
-          .scheduleAtFixedRate(getRunner(), 0, getTimeInterval(), TimeUnit.SECONDS);
+              .setNameFormat(getThreadNameFormat())
+              .setDaemon(true)
+              .build())
+          .scheduleAtFixedRate(getRunner(), 60 * 2, getTimeInterval(), TimeUnit.SECONDS);
     }
     else
     {
