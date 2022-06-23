@@ -34,8 +34,9 @@ public interface IEventLogger
   /**
    * Captured, that the EDT is under heavy load
    *
-   * @param pThreadInfo EDT-Info
+   * @param pThreadInfo     EDT-Info
+   * @param pAllThreadInfos All Threads
    */
-  void captureEDTStress(@NotNull ThreadInfo pThreadInfo);
+  void captureEDTStress(@NotNull ThreadInfo pThreadInfo, @NotNull ThreadInfo[] pAllThreadInfos);
 
 }

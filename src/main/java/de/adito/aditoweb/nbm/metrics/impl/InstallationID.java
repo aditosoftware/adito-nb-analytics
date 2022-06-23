@@ -53,7 +53,25 @@ public class InstallationID
   @NotNull
   public String asText()
   {
-    return value + "-" + getVersion();
+    return getID() + "-" + getVersion();
+  }
+
+  /**
+   * @return the installation id without version
+   */
+  @NotNull
+  public String getID()
+  {
+    return value;
+  }
+
+  /**
+   * @return true, if the adito version is not known
+   */
+  public boolean isUnknownVersion()
+  {
+    String v = getVersion();
+    return v.endsWith("DEV") || v.equals("UNKNOWN");
   }
 
   /**
