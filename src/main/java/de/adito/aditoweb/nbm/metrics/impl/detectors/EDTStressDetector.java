@@ -74,13 +74,27 @@ public class EDTStressDetector extends ARunnableDetector implements IEDTStressDe
         long maxPercentage = Math.max(diffPercentage, userDiffPercentage);
         metricsProxy.logStress(maxPercentage);
 
-        if (maxPercentage > STRESS_PERCENTAGE && !lastThresholdExceeded)
+        if (maxPercentage > STRESS_PERCENTAGE && !lastThresholdExceeded && !isCurrentlyIdle(edtID))
           IEventLogger.getInstance().captureEDTStress(threadBean.getThreadInfo(edtID, Integer.MAX_VALUE), threadBean.dumpAllThreads(true, true));
         lastThresholdExceeded = maxPercentage > STRESS_PERCENTAGE;
       }
 
       lastEDTCPUTime = edtCPUTime;
       lastEDTUserTime = edtUserTime;
+    }
+
+    /**
+     * Check if the edt thread is currently idle
+     *
+     * @param pProcessId id of the process to check
+     * @return true if the thread is currently parked and idle, false otherwise (also returns false if in waiting status)
+     */
+    private boolean isCurrentlyIdle(long pProcessId)
+    {
+      StackTraceElement[] stackTrace = threadBean.getThreadInfo(pProcessId, 1).getStackTrace();
+      if (stackTrace != null && stackTrace.length > 0)
+        return "jdk.internal.misc.Unsafe".equals(stackTrace[0].getClassName()) && "park".equals(stackTrace[0].getMethodName());
+      return false;
     }
 
     @Histogram(name = "EDTStressPercentage")
