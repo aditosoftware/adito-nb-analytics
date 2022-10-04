@@ -25,8 +25,9 @@ public class ThreadUtility
     StringBuilder sb = new StringBuilder("\"" + pThreadInfo.getThreadName() + "\"" +
                                              (pThreadInfo.isDaemon() ? " daemon" : "") +
                                              " prio=" + pThreadInfo.getPriority() +
-                                             " Id=" + pThreadInfo.getThreadId() + " " +
-                                             pThreadInfo.getThreadState());
+                                             " tid=0x" + String.format("%X", pThreadInfo.getThreadId()) +
+                                             " nid=NA " +
+                                             pThreadInfo.getThreadState().toString().toLowerCase());
     if (pThreadInfo.getLockName() != null)
     {
       sb.append(" on " + pThreadInfo.getLockName());
@@ -45,6 +46,7 @@ public class ThreadUtility
       sb.append(" (in native)");
     }
     sb.append('\n');
+    sb.append("  java.lang.Thread.State: ").append(pThreadInfo.getThreadState()).append("\n");
     StackTraceElement[] stackTrace = pThreadInfo.getStackTrace();
     int i = 0;
     for (; i < stackTrace.length; i++)
@@ -94,7 +96,6 @@ public class ThreadUtility
         sb.append('\n');
       }
     }
-    sb.append('\n');
     return sb.toString();
   }
 
@@ -109,7 +110,7 @@ public class ThreadUtility
   {
     return Arrays.stream(pAllThreadInfos)
         .map(ThreadUtility::getThreadInfoStacktrace)
-        .collect(Collectors.joining("\n\n"));
+        .collect(Collectors.joining("\n"));
   }
 
   @NotNull

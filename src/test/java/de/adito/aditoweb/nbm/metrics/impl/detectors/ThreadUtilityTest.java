@@ -17,7 +17,7 @@ class ThreadUtilityTest
   void name()
   {
     ThreadInfo threadInfo = mock(ThreadInfo.class);
-    when(threadInfo.getThreadId()).thenReturn(1L);
+    when(threadInfo.getThreadId()).thenReturn(25L);
     when(threadInfo.getPriority()).thenReturn(1);
     when(threadInfo.getThreadName()).thenReturn("test");
     when(threadInfo.isDaemon()).thenReturn(false);
@@ -42,9 +42,10 @@ class ThreadUtilityTest
         new StackTraceElement("test10", "number", "file.class", 1),
         new StackTraceElement("test11", "letter", "file.class", 1),
         new StackTraceElement("test12", "string", "file.class", 1)
-        };
+    };
     when(threadInfo.getStackTrace()).thenReturn(stackTraceElements);
-    assertEquals("\"test\" prio=1 Id=1 WAITING on lockname (suspended)\n" +
+    assertEquals("\"test\" prio=1 tid=0x19 nid=NA waiting on lockname (suspended)\n" +
+                     "  java.lang.Thread.State: WAITING\n" +
                      "\tat test1.line(file.class:1)\n" +
                      "\t-  waiting on Lockclass@4d2\n" +
                      "\tat test2.method(file.class:1)\n" +
@@ -57,6 +58,6 @@ class ThreadUtilityTest
                      "\tat test9.class(file.class:1)\n" +
                      "\tat test10.number(file.class:1)\n" +
                      "\tat test11.letter(file.class:1)\n" +
-                     "\tat test12.string(file.class:1)\n\n", ThreadUtility.getThreadDump(new ThreadInfo[] {threadInfo}));
+                     "\tat test12.string(file.class:1)\n", ThreadUtility.getThreadDump(new ThreadInfo[]{threadInfo}));
   }
 }
