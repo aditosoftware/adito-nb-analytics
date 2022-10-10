@@ -5,6 +5,16 @@ OpenIDE-Module-Display-Category: ADITO / Analytics
 OpenIDE-Module-Long-Description: Collects common platform analytics and anonymous usage statistics.
  This data is send to ADITO, to improve the overall stability of the ADITO Designer at runtime.
   <p style="font-weight: bold;">Changelog</p>
+  <p style="font-weight: bold;">v1.1.1</p>
+  <p style="margin-left: 10px; font-weight: bold;">MINOR</p>
+  <ul>
+    <li>The EDTStressDetector now only sends the stacktrace if the EDT is not currently idle</li>
+    <li>Reformatted Stacktraces to a format that can be parsed by IntelliJ</li>
+  </ul>
+  <p style="margin-left: 10px; font-weight: bold;">BUGFIX</p>
+  <ul>
+    <li>Fix: DeadlockDetector can detect false positives for deadlocks</li>
+  </ul>
   <p style="font-weight: bold;">v1.1.0</p>
   <p style="margin-left: 10px; font-weight: bold;">MAJOR</p>
   <ul>
