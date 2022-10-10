@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 public class MetricProxyFactoryImpl implements IMetricProxyFactory
 {
 
-  public static final boolean ENABLED = false; // currently disabled, because the data wont get reviewed afterwards
   private static final Logger _LOGGER = Logger.getLogger(MetricProxyFactoryImpl.class.getName());
   private final IInterceptableObjectFactory objectFactory = new InterceptableObjectFactory();
 
@@ -30,7 +29,7 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
   public boolean canCreateProxy(@NotNull Object pObject)
   {
     // proxy everything, if enabled
-    return ENABLED;
+    return true;
   }
 
   @NotNull
@@ -39,9 +38,7 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
   {
     try
     {
-      if (ENABLED)
-        return objectFactory.createInterceptableProxy(pObject, new _MetricInvocationHandler<>(pObject));
-      return pObject;
+      return objectFactory.createInterceptableProxy(pObject, new _MetricInvocationHandler<>(pObject));
     }
     catch (Throwable e) //NOSONAR catch everything, including NoSuchMethodError
     {

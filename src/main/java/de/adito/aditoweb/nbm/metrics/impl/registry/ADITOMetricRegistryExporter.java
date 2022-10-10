@@ -2,7 +2,6 @@ package de.adito.aditoweb.nbm.metrics.impl.registry;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.adito.aditoweb.nbm.metrics.impl.InstallationID;
-import de.adito.aditoweb.nbm.metrics.impl.proxy.MetricProxyFactoryImpl;
 import de.adito.aditoweb.nbm.metrics.impl.user.IUserAgreement;
 import io.prometheus.client.Collector;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
@@ -28,6 +27,7 @@ import java.util.logging.*;
 @SuppressWarnings("unused")
 class ADITOMetricRegistryExporter
 {
+  private static final boolean _ENABLED = false; // currently disabled, because the data wont get reviewed afterwards
   private static final Logger _LOGGER = Logger.getLogger(ADITOMetricRegistryExporter.class.getName());
   private static final long _INTERVAL_MS = Long.parseLong(System.getProperty("adito.metrics.exporter.prometheus.push.interval", "30000"));
   private static final boolean _LOG_ENABLED = System.getProperty("adito.metrics.exporter.log") != null;
@@ -68,7 +68,7 @@ class ADITOMetricRegistryExporter
   {
     // init observable to observe analytics state
     // will start automatically, if we should - because the observable triggers it
-    if (MetricProxyFactoryImpl.ENABLED && analyticsAllowedDisposable == null)
+    if (_ENABLED && analyticsAllowedDisposable == null)
       analyticsAllowedDisposable = IUserAgreement.getInstance().sendingAnalyticsAllowed()
           .subscribeOn(Schedulers.computation())
           .observeOn(Schedulers.computation())
