@@ -114,6 +114,7 @@ class SentryEventLogger implements IEventLogger
 
     // Custom Tags
     event.setTag("os", System.getProperty("os.name"));
+    event.setTag("plugins.analytics", Modules.getDefault().ownerOf(getClass()).getImplementationVersion());
 
     // User
     User user = new User();
