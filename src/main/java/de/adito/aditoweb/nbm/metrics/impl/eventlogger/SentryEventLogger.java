@@ -23,6 +23,7 @@ class SentryEventLogger implements IEventLogger
 {
 
   protected static final SentryEventLogger INSTANCE = new SentryEventLogger();
+  private static final String ANALYTICS_VERSION = Modules.getDefault().ownerOf(SentryEventLogger.class).getImplementationVersion();
   private static final Logger LOGGER = Logger.getLogger(SentryEventLogger.class.getName());
   private static final String SENTRY_DSN = "http://ae97332f81694a3e81891dcce06e31a7@157.90.233.96:9000/2";
 
@@ -71,6 +72,13 @@ class SentryEventLogger implements IEventLogger
               pOptions.setSessionTrackingIntervalMillis(30000);
             });
             Sentry.startSession();
+            Sentry.configureScope(pScope -> {
+              User user = new User();
+              user.setId(InstallationID.get().getID());
+              pScope.setUser(user);
+              pScope.setTag("os", System.getProperty("os.name"));
+              pScope.setTag("plugins.analytics", ANALYTICS_VERSION);
+            });
           }
           else if (!pSendingAnalyticsAllowed && Sentry.isEnabled())
           {
@@ -111,15 +119,6 @@ class SentryEventLogger implements IEventLogger
       message.setMessage(pTitle);
       event.setMessage(message);
     }
-
-    // Custom Tags
-    event.setTag("os", System.getProperty("os.name"));
-    event.setTag("plugins.analytics", Modules.getDefault().ownerOf(getClass()).getImplementationVersion());
-
-    // User
-    User user = new User();
-    user.setId(InstallationID.get().getID());
-    event.setUser(user);
 
     // Threads
     if (pThreadInfos != null)
