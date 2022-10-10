@@ -42,20 +42,12 @@ OpenIDE-Module-Short-Description: Collects common platform analytics and anonymo
 X-Class-Path: ext/de.adito.aditoweb.nbm.analytics/de-adito-nb-modules/
  de-adito-netbeans-utilities.jar ext/de.adito.aditoweb.nbm.analytics/i
  nfo-clearthought/table-layout.jar ext/de.adito.aditoweb.nbm.analytics
- /io-dropwizard-metrics/metrics-core.jar ext/de.adito.aditoweb.nbm.ana
- lytics/io-prometheus/simpleclient.jar ext/de.adito.aditoweb.nbm.analy
- tics/io-prometheus/simpleclient_pushgateway.jar ext/de.adito.aditoweb
- .nbm.analytics/io-prometheus/simpleclient_common.jar ext/de.adito.adi
- toweb.nbm.analytics/io-prometheus/simpleclient_dropwizard.jar ext/de.
- adito.aditoweb.nbm.analytics/net-bytebuddy/byte-buddy.jar ext/de.adit
- o.aditoweb.nbm.analytics/org-objenesis/objenesis.jar ext/de.adito.adi
- toweb.nbm.analytics/io-sentry/sentry.jar
+ /net-bytebuddy/byte-buddy.jar ext/de.adito.aditoweb.nbm.analytics/org
+ -objenesis/objenesis.jar ext/de.adito.aditoweb.nbm.analytics/io-sentr
+ y/sentry.jar
 Maven-Class-Path: de.adito.nb-modules:de-adito-netbeans-utilities:RELE
- ASE122-1.6.2-1 info.clearthought:table-layout:4.2.1 io.dropwizard.met
- rics:metrics-core:3.2.6 io.prometheus:simpleclient:0.9.0 io.prometheu
- s:simpleclient_pushgateway:0.9.0 io.prometheus:simpleclient_common:0.
- 9.0 io.prometheus:simpleclient_dropwizard:0.9.0 net.bytebuddy:byte-bu
- ddy:1.11.6 org.objenesis:objenesis:3.2 io.sentry:sentry:6.1.2
+ ASE122-1.6.2-1 info.clearthought:table-layout:4.2.1 net.bytebuddy:byt
+ e-buddy:1.11.6 org.objenesis:objenesis:3.2 io.sentry:sentry:6.1.2
 OpenIDE-Module-Module-Dependencies: de.adito.aditoweb.modules.nbide.nb
  aditointerface > 1.7.0, de.adito.nbm.de.adito.metrics.api > 6.0, org.
  openide.actions > 6.49, org.openide.util > 9.17, org.openide.filesyst
