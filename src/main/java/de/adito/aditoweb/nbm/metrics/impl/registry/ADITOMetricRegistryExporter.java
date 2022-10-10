@@ -2,6 +2,7 @@ package de.adito.aditoweb.nbm.metrics.impl.registry;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.adito.aditoweb.nbm.metrics.impl.InstallationID;
+import de.adito.aditoweb.nbm.metrics.impl.proxy.MetricProxyFactoryImpl;
 import de.adito.aditoweb.nbm.metrics.impl.user.IUserAgreement;
 import io.prometheus.client.Collector;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
@@ -67,7 +68,7 @@ class ADITOMetricRegistryExporter
   {
     // init observable to observe analytics state
     // will start automatically, if we should - because the observable triggers it
-    if (analyticsAllowedDisposable == null)
+    if (MetricProxyFactoryImpl.ENABLED && analyticsAllowedDisposable == null)
       analyticsAllowedDisposable = IUserAgreement.getInstance().sendingAnalyticsAllowed()
           .subscribeOn(Schedulers.computation())
           .observeOn(Schedulers.computation())
