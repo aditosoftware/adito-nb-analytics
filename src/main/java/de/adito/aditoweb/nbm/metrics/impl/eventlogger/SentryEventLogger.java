@@ -27,13 +27,16 @@ class SentryEventLogger implements IEventLogger
   private static final Logger LOGGER = Logger.getLogger(SentryEventLogger.class.getName());
   private static final String SENTRY_DSN = "http://ae97332f81694a3e81891dcce06e31a7@157.90.233.96:9000/2";
 
+  private static final Set<String> IGNORED_EXCEPTIONS = Set.of("de.adito.aditoweb.nbm.designertunnel.connection.TunnelDisconnectionException");
+
   @SuppressWarnings({"FieldCanBeLocal", "unused"}) // only once inited
   private Disposable disposable;
 
   @Override
   public void captureRegularException(@NotNull Throwable pException)
   {
-    _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.ERROR, null, pException, null)));
+    if (!IGNORED_EXCEPTIONS.contains(pException.getClass().getName()))
+      _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.ERROR, null, pException, null)));
   }
 
   @Override
