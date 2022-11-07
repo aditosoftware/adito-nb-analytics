@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ThreadInfo;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @author w.glanzer, 23.06.2022
@@ -35,8 +36,8 @@ public interface IEventLogger
    * Captured, that the EDT is under heavy load
    *
    * @param pThreadInfo     EDT-Info
-   * @param pAllThreadInfos All Threads
+   * @param pAllThreadInfos Supplier for retrieving all threads infos (stacktrace etc.)
    */
-  void captureEDTStress(@NotNull ThreadInfo pThreadInfo, @NotNull ThreadInfo[] pAllThreadInfos);
+  void captureEDTStress(@NotNull ThreadInfo pThreadInfo, @NotNull Supplier<ThreadInfo[]> pAllThreadInfos);
 
 }

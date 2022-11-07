@@ -13,6 +13,7 @@ import org.openide.windows.OnShowing;
 import java.lang.management.ThreadInfo;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,9 @@ class SentryEventLogger implements IEventLogger
   private static final String SENTRY_DSN = "http://ae97332f81694a3e81891dcce06e31a7@157.90.233.96:9000/2";
 
   private static final Set<String> IGNORED_EXCEPTIONS = Set.of("de.adito.aditoweb.nbm.designertunnel.connection.TunnelDisconnectionException");
+
+  private static final Set<String> IGNORE_EDT_IF_IN_CLASS = Set.of("org.netbeans.modules.progress.ui.RunOffEDTImpl",
+                                                                "de.adito.git.nbm.sidebar.EditorColorizer");
 
   @SuppressWarnings({"FieldCanBeLocal", "unused"}) // only once inited
   private Disposable disposable;
@@ -48,11 +52,15 @@ class SentryEventLogger implements IEventLogger
   }
 
   @Override
-  public void captureEDTStress(@NotNull ThreadInfo pThreadInfo, @NotNull ThreadInfo[] pAllThreadInfos)
+  public void captureEDTStress(@NotNull ThreadInfo pEdtInfo, @NotNull Supplier<ThreadInfo[]> pAllThreadInfos)
   {
-    _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.FATAL, List.of(pThreadInfo), null, "EDT Stress"),
-                                              Hint.withAttachment(new Attachment(ThreadUtility.getThreadDump(pAllThreadInfos).getBytes(StandardCharsets.UTF_8),
-                                                                                 "threaddump.tdump"))));
+    if (Arrays.stream(pEdtInfo.getStackTrace()).noneMatch(pStackTraceElement -> IGNORE_EDT_IF_IN_CLASS.contains(pStackTraceElement.getClassName())))
+    {
+      _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.FATAL, List.of(pEdtInfo), null, "EDT Stress"),
+                                                Hint.withAttachment(new Attachment(ThreadUtility.getThreadDump(pAllThreadInfos.get())
+                                                                                       .getBytes(StandardCharsets.UTF_8),
+                                                                                   "threaddump.tdump"))));
+    }
   }
 
   /**

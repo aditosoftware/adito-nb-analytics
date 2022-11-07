@@ -19,8 +19,6 @@ public class EDTStressDetector extends ARunnableDetector implements IEDTStressDe
 
   private static final double STRESS_PERCENTAGE = Double.parseDouble(System.getProperty(IEDTStressDetector.ALERT_LEVEL, "66"));
   private static final Logger LOGGER = Logger.getLogger(EDTStressDetector.class.getName());
-  private static final Set<String> IGNORED_IF_IN_CLASS = Set.of("org.netbeans.modules.progress.ui.RunOffEDTImpl",
-                                                                "de.adito.git.nbm.sidebar.EditorColorizer");
 
   @Override
   String getThreadNameFormat()
@@ -79,11 +77,7 @@ public class EDTStressDetector extends ARunnableDetector implements IEDTStressDe
         if (maxPercentage > STRESS_PERCENTAGE && !lastThresholdExceeded && !isCurrentlyIdle(edtID))
         {
           ThreadInfo edtThreadInfo = threadBean.getThreadInfo(edtID, Integer.MAX_VALUE);
-          if (Arrays.stream(edtThreadInfo.getStackTrace())
-              .noneMatch(pStackTraceElement -> IGNORED_IF_IN_CLASS.contains(pStackTraceElement.getClassName())))
-          {
-            IEventLogger.getInstance().captureEDTStress(edtThreadInfo, threadBean.dumpAllThreads(true, true));
-          }
+          IEventLogger.getInstance().captureEDTStress(edtThreadInfo, () -> threadBean.dumpAllThreads(true, true));
         }
         lastThresholdExceeded = maxPercentage > STRESS_PERCENTAGE;
       }
