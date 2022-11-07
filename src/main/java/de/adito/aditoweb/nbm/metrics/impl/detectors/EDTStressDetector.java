@@ -19,7 +19,7 @@ public class EDTStressDetector extends ARunnableDetector implements IEDTStressDe
 
   private static final double STRESS_PERCENTAGE = Double.parseDouble(System.getProperty(IEDTStressDetector.ALERT_LEVEL, "66"));
   private static final Logger LOGGER = Logger.getLogger(EDTStressDetector.class.getName());
-  private static final Set<String> IGNORED_IF_IN_CLASS = Set.of("de.adito.git.nbm.progress.AsyncProgressFacadeImpl",
+  private static final Set<String> IGNORED_IF_IN_CLASS = Set.of("org.netbeans.modules.progress.ui.RunOffEDTImpl",
                                                                 "de.adito.git.nbm.sidebar.EditorColorizer");
 
   @Override
