@@ -5,6 +5,12 @@ OpenIDE-Module-Display-Category: ADITO / Analytics
 OpenIDE-Module-Long-Description: Collects common platform analytics and anonymous usage statistics.
  This data is send to ADITO, to improve the overall stability of the ADITO Designer at runtime.
   <p style="font-weight: bold;">Changelog</p>
+  <p style="font-weight: bold;">v1.1.3</p>
+  <p style="margin-left: 10px; font-weight: bold;">MINOR</p>
+  <ul>
+    <li>Ignore exceptions that signal that a tunnel was closed, since those are required for the designer to work</li>
+    <li>Removed indications for GUI blockages if the designer is only showing a progress bar</li>
+  </ul>
   <p style="font-weight: bold;">v1.1.2</p>
   <p style="margin-left: 10px; font-weight: bold;">MINOR</p>
   <ul>
