@@ -30,8 +30,9 @@ class SentryEventLogger implements IEventLogger
 
   private static final Set<String> IGNORED_EXCEPTIONS = Set.of("de.adito.aditoweb.nbm.designertunnel.connection.TunnelDisconnectionException");
 
-  private static final Set<String> IGNORE_EDT_IF_IN_CLASS = Set.of("org.netbeans.modules.progress.ui.RunOffEDTImpl",
-                                                                   "de.adito.git.nbm.sidebar.EditorColorizer");
+  // lowercase -> if the content of a contains call is also first converted to lowerCase a case-insensitive contains call is possible
+  private static final Set<String> IGNORE_EDT_IF_IN_CLASS = Set.of("org.netbeans.modules.progress.ui.RunOffEDTImpl".toLowerCase(),
+                                                                   "de.adito.git.nbm.sidebar.EditorColorizer".toLowerCase());
 
   @SuppressWarnings({"FieldCanBeLocal", "unused"}) // only once inited
   private Disposable disposable;
@@ -58,13 +59,13 @@ class SentryEventLogger implements IEventLogger
     boolean containsAditoTrace = false;
     for (StackTraceElement stackTraceElement : pEdtInfo.getStackTrace())
     {
-      if (IGNORE_EDT_IF_IN_CLASS.contains(stackTraceElement.getClassName()))
+      if (IGNORE_EDT_IF_IN_CLASS.contains(stackTraceElement.getClassName().toLowerCase()))
       {
         ignoreEDT = true;
         // break here because if ignoreEDT is true, the event should not be sent regardless of the contents of the other strackTraceElements
         break;
       }
-      if (stackTraceElement.getClassName().contains("adito"))
+      if (stackTraceElement.getClassName().toLowerCase().contains("adito"))
       {
         containsAditoTrace = true;
         // no break here, since it is possible that one of the remaining stackTraceElements contains an ignored class
