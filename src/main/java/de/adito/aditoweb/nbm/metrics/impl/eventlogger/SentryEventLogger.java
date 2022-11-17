@@ -31,7 +31,7 @@ class SentryEventLogger implements IEventLogger
   private static final Set<String> IGNORED_EXCEPTIONS = Set.of("de.adito.aditoweb.nbm.designertunnel.connection.TunnelDisconnectionException");
 
   private static final Set<String> IGNORE_EDT_IF_IN_CLASS = Set.of("org.netbeans.modules.progress.ui.RunOffEDTImpl",
-                                                                "de.adito.git.nbm.sidebar.EditorColorizer");
+                                                                   "de.adito.git.nbm.sidebar.EditorColorizer");
 
   @SuppressWarnings({"FieldCanBeLocal", "unused"}) // only once inited
   private Disposable disposable;
@@ -54,7 +54,24 @@ class SentryEventLogger implements IEventLogger
   @Override
   public void captureEDTStress(@NotNull ThreadInfo pEdtInfo, @NotNull Supplier<ThreadInfo[]> pAllThreadInfos)
   {
-    if (Arrays.stream(pEdtInfo.getStackTrace()).noneMatch(pStackTraceElement -> IGNORE_EDT_IF_IN_CLASS.contains(pStackTraceElement.getClassName())))
+    boolean ignoreEDT = false;
+    boolean containsAditoTrace = false;
+    for (StackTraceElement stackTraceElement : pEdtInfo.getStackTrace())
+    {
+      if (IGNORE_EDT_IF_IN_CLASS.contains(stackTraceElement.getClassName()))
+      {
+        ignoreEDT = true;
+        // break here because if ignoreEDT is true, the event should not be sent regardless of the contents of the other strackTraceElements
+        break;
+      }
+      if (stackTraceElement.getClassName().contains("adito"))
+      {
+        containsAditoTrace = true;
+        // no break here, since it is possible that one of the remaining stackTraceElements contains an ignored class
+      }
+    }
+    // only send the event if 1) none of the ignored classes is in the stacktrace and 2) at least one stackTraceElement contains a class with adito in its full class name
+    if (!ignoreEDT && containsAditoTrace)
     {
       _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.FATAL, List.of(pEdtInfo), null, "EDT Stress"),
                                                 Hint.withAttachment(new Attachment(ThreadUtility.getThreadDump(pAllThreadInfos.get())
