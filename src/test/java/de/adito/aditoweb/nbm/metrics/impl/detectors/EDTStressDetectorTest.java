@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.metrics.impl.detectors;
 
+import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
@@ -17,10 +18,13 @@ class EDTStressDetectorTest
   @Test
   void isDumpThreadsIfStressAboveThreshhold()
   {
-    try(MockedStatic<ManagementFactory> managementFactoryMockedStatic = mockStatic(ManagementFactory.class))
+    try(MockedStatic<ManagementFactory> managementFactoryMockedStatic = mockStatic(ManagementFactory.class);
+        MockedStatic<IEventLogger> eventLoggerMockedStatic = mockStatic(IEventLogger.class))
     {
       ThreadMXBean mockedThreadBean = mock(ThreadMXBean.class);
       managementFactoryMockedStatic.when(ManagementFactory::getThreadMXBean).thenReturn(mockedThreadBean);
+      IEventLogger eventLogger = mock(IEventLogger.class);
+      eventLoggerMockedStatic.when(IEventLogger::getInstance).thenReturn(eventLogger);
       when(mockedThreadBean.getAllThreadIds()).thenReturn(new long[]{1L});
       ThreadInfo mockedThreadInfo = mock(ThreadInfo.class);
       when(mockedThreadInfo.getThreadId()).thenReturn(1L);
@@ -40,6 +44,7 @@ class EDTStressDetectorTest
       };
       when(mockedThreadInfo.getStackTrace()).thenReturn(stackTraceElements);
       when(mockedThreadBean.getThreadInfo(1L)).thenReturn(mockedThreadInfo);
+      when(mockedThreadBean.getThreadInfo(1L, 1)).thenReturn(mockedThreadInfo);
       when(mockedThreadBean.getThreadInfo(1L, Integer.MAX_VALUE)).thenReturn(mockedThreadInfo);
       when(mockedThreadInfo.getThreadName()).thenReturn("AWT-EventQueue");
       when(mockedThreadBean.getThreadCpuTime(1L)).thenReturn(0L).thenReturn(700_000_000L);
@@ -49,6 +54,7 @@ class EDTStressDetectorTest
       executor.run();
       executor.run();
       verify(mockedThreadBean, atLeast(1)).getThreadInfo(1L, Integer.MAX_VALUE);
+      verify(eventLogger, times(1)).captureEDTStress(Mockito.any(), Mockito.any());
     }
   }
 
