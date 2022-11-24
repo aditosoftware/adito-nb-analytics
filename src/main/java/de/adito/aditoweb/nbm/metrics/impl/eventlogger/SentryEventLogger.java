@@ -30,11 +30,14 @@ class SentryEventLogger implements IEventLogger
 
   private static final Set<String> IGNORED_EXCEPTIONS = Set.of("de.adito.aditoweb.nbm.designertunnel.connection.TunnelDisconnectionException");
 
-  private static final Set<String> IGNORE_EDT_IF_IN_CLASS = Set.of("org.netbeans.modules.progress.ui.RunOffEDTImpl",
-                                                                "de.adito.git.nbm.sidebar.EditorColorizer");
+  // lowercase -> if the content of a contains call is also first converted to lowerCase a case-insensitive contains call is possible
+  private static final Set<String> IGNORE_EDT_IF_IN_CLASS = Set.of("org.netbeans.modules.progress.ui.RunOffEDTImpl".toLowerCase(),
+                                                                   "de.adito.git.nbm.sidebar.EditorColorizer".toLowerCase());
 
   @SuppressWarnings({"FieldCanBeLocal", "unused"}) // only once inited
   private Disposable disposable;
+  // keep a hash of the last sent EDT stacktrace hash to check if the stacktrace changed -> no change no event
+  private int lastSentEdtStackTraceHash = 0;
 
   @Override
   public void captureRegularException(@NotNull Throwable pException)
@@ -54,12 +57,35 @@ class SentryEventLogger implements IEventLogger
   @Override
   public void captureEDTStress(@NotNull ThreadInfo pEdtInfo, @NotNull Supplier<ThreadInfo[]> pAllThreadInfos)
   {
-    if (Arrays.stream(pEdtInfo.getStackTrace()).noneMatch(pStackTraceElement -> IGNORE_EDT_IF_IN_CLASS.contains(pStackTraceElement.getClassName())))
+    boolean ignoreEDT = false;
+    boolean containsAditoTrace = false;
+    StackTraceElement[] edtStackTrace = pEdtInfo.getStackTrace();
+    int currentStackTraceHash = Arrays.hashCode(edtStackTrace);
+    if (currentStackTraceHash != lastSentEdtStackTraceHash)
     {
-      _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.FATAL, List.of(pEdtInfo), null, "EDT Stress"),
-                                                Hint.withAttachment(new Attachment(ThreadUtility.getThreadDump(pAllThreadInfos.get())
-                                                                                       .getBytes(StandardCharsets.UTF_8),
-                                                                                   "threaddump.tdump"))));
+      for (StackTraceElement stackTraceElement : edtStackTrace)
+      {
+        if (IGNORE_EDT_IF_IN_CLASS.contains(stackTraceElement.getClassName().toLowerCase()))
+        {
+          ignoreEDT = true;
+          // break here because if ignoreEDT is true, the event should not be sent regardless of the contents of the other strackTraceElements
+          break;
+        }
+        if (stackTraceElement.getClassName().toLowerCase().contains("adito"))
+        {
+          containsAditoTrace = true;
+          // no break here, since it is possible that one of the remaining stackTraceElements contains an ignored class
+        }
+      }
+      // only send the event if 1) none of the ignored classes is in the stacktrace and 2) at least one stackTraceElement contains a class with adito in its full class name
+      if (!ignoreEDT && containsAditoTrace)
+      {
+        lastSentEdtStackTraceHash = currentStackTraceHash;
+        _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.FATAL, List.of(pEdtInfo), null, "EDT Stress"),
+                                                  Hint.withAttachment(new Attachment(ThreadUtility.getThreadDump(pAllThreadInfos.get())
+                                                                                         .getBytes(StandardCharsets.UTF_8),
+                                                                                     "threaddump.tdump"))));
+      }
     }
   }
 
