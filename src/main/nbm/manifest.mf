@@ -5,6 +5,11 @@ OpenIDE-Module-Display-Category: ADITO / Analytics
 OpenIDE-Module-Long-Description: Collects common platform analytics and anonymous usage statistics.
  This data is send to ADITO, to improve the overall stability of the ADITO Designer at runtime.
   <p style="font-weight: bold;">Changelog</p>
+  <p style="font-weight: bold;">v1.1.4</p>
+  <ul>
+    <li>Only log high GUI workload if the stacktrace changed compared to the last sent event</li>
+    <li>Only log high GUI workload if the stacktrace contains at least one adito element</li>
+  </ul>
   <p style="font-weight: bold;">v1.1.3</p>
   <p style="margin-left: 10px; font-weight: bold;">MINOR</p>
   <ul>
