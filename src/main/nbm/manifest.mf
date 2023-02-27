@@ -81,4 +81,4 @@ OpenIDE-Module-Module-Dependencies: de.adito.aditoweb.modules.nbide.nb
  .netbeans.swing.outline > 1.44, org.openide.dialogs > 7.52,
  rxjava > 3.0.4, de.adito.util.reactive > 1.1.4, com.google.guava > 29.
  0.0, de.adito.picoservice.picoservice > 1.1.6, org.netbeans.modules.op
- tions.api/1 > 1.55
+ tions.api/1 > 1.55, org.netbeans.modules.autoupdate.services > 1.65

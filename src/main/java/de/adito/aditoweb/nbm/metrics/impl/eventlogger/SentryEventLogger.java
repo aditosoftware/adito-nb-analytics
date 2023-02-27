@@ -7,6 +7,7 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.sentry.*;
 import io.sentry.protocol.*;
 import org.jetbrains.annotations.*;
+import org.netbeans.api.autoupdate.*;
 import org.openide.modules.*;
 import org.openide.windows.OnShowing;
 
@@ -24,7 +25,6 @@ class SentryEventLogger implements IEventLogger
 {
 
   protected static final SentryEventLogger INSTANCE = new SentryEventLogger();
-  private static final String ANALYTICS_VERSION = Modules.getDefault().ownerOf(SentryEventLogger.class).getImplementationVersion();
   private static final Logger LOGGER = Logger.getLogger(SentryEventLogger.class.getName());
   private static final String SENTRY_DSN = "http://ae97332f81694a3e81891dcce06e31a7@157.90.233.96:9000/2";
 
@@ -114,7 +114,7 @@ class SentryEventLogger implements IEventLogger
               user.setId(InstallationID.get().getID());
               pScope.setUser(user);
               pScope.setTag("os", System.getProperty("os.name"));
-              pScope.setTag("plugins.analytics", ANALYTICS_VERSION);
+              getInstalledPlugins().forEach(pScope::setTag);
             });
           }
           else if (!pSendingAnalyticsAllowed && Sentry.isEnabled())
@@ -168,6 +168,41 @@ class SentryEventLogger implements IEventLogger
       event.setThrowable(pThrowable);
 
     return event;
+  }
+
+  /**
+   * @return all installed ADITO plugins with the name as key and the version as value
+   */
+  @NotNull
+  private Map<String, String> getInstalledPlugins()
+  {
+    return UpdateManager.getDefault().getUpdateUnits(UpdateManager.TYPE.KIT_MODULE).stream()
+        .map(UpdateUnit::getInstalled)
+        .filter(Objects::nonNull)
+        .filter(pElement -> pElement.getCategory() != null && pElement.getCategory().startsWith("ADITO"))
+        .collect(Collectors.toMap(this::getPluginID, UpdateElement::getSpecificationVersion));
+  }
+
+  /**
+   * Evaluates the ID of a plugin to be included in every sent object
+   *
+   * @param pElement Element to get the ID for
+   * @return the ID
+   */
+  @NotNull
+  private String getPluginID(@NotNull UpdateElement pElement)
+  {
+    // ID based on codeName
+    String id = pElement.getCodeName();
+
+    // skip every parent package, so only the last package will be present
+    id = id.substring(id.lastIndexOf('.') + 1);
+
+    // lowercase everything
+    id = id.toLowerCase(Locale.ROOT);
+
+    // add prefix, so we know its from a plugin
+    return "plugins." + id;
   }
 
   @OnShowing
