@@ -68,7 +68,7 @@ jobs:
           step: restore
 
       - name: Maven / Compile
-        run: mvn clean package "-Dmaven.javadoc.skip=true"
+        run: mvn --batch-mode install -U -T 1C "-Dmaven.javadoc.skip=true"
 
       - name: Maven / Integration Test
         run: mvn test-compile failsafe:integration-test failsafe:verify
