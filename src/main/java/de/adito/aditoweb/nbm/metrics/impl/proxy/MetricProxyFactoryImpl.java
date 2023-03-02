@@ -85,7 +85,9 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
     @Override
     public Object invoke(Object pProxy, Method pMethod, Object[] pArgs) throws Throwable
     {
+      Map<String, Object> hints = new HashMap<>();
       AtomicReference<Object> methodResult = new AtomicReference<>();
+      AtomicReference<Throwable> methodException = new AtomicReference<>();
 
       try
       {
@@ -95,7 +97,7 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
           {
             if (pInvocation != null)
               //noinspection unchecked,rawtypes
-              ((IMetricHandler) pInvocation.second()).beforeMethod(pInvocation.first(), pProxy, pMethod, pArgs);
+              ((IMetricHandler) pInvocation.second()).beforeMethod(pInvocation.first(), pProxy, pMethod, pArgs, hints);
           }
           catch (Throwable t) // NOSONAR we do want to catch all exceptions, so the user does not notice this ones
           {
@@ -103,10 +105,20 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
           }
         });
 
-        // call method itself
+        // prepare method calling
         pMethod.setAccessible(true);
-        methodResult.set(pMethod.invoke(object, pArgs));
-        return methodResult.get();
+
+        try
+        {
+          // call method itself and track exception, if any occured
+          methodResult.set(pMethod.invoke(object, pArgs));
+          return methodResult.get();
+        }
+        catch (Throwable t)
+        {
+          methodException.set(t);
+          throw t;
+        }
       }
       finally
       {
@@ -116,7 +128,7 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
           {
             if (pInvocation != null)
               //noinspection unchecked,rawtypes
-              ((IMetricHandler) pInvocation.second()).afterMethod(pInvocation.first(), pProxy, pMethod, pArgs, methodResult.get());
+              ((IMetricHandler) pInvocation.second()).afterMethod(pInvocation.first(), pProxy, pMethod, pArgs, methodResult.get(), methodException.get(), hints);
           }
           catch (Throwable t) // NOSONAR we do want to catch all exceptions, so the user does not notice this ones
           {

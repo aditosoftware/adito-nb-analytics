@@ -17,7 +17,8 @@ public class ExternalSampledMetricHandler implements IMetricHandler<Sampled>
 {
 
   @Override
-  public void beforeMethod(@NotNull Sampled pAnnotation, @NotNull Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs) throws Exception
+  public void beforeMethod(@NotNull Sampled pAnnotation, @NotNull Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs,
+                           @NotNull Map<String, Object> pHints)
   {
     // Check if this execution should be handled by an external event logger
     for (Object arg : pArgs)
