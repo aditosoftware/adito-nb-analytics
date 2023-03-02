@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class SentryEventLogger implements IEventLogger
 {
 
-  protected static final SentryEventLogger INSTANCE = new SentryEventLogger();
   private static final Logger LOGGER = Logger.getLogger(SentryEventLogger.class.getName());
   private static final String SENTRY_DSN = "http://ae97332f81694a3e81891dcce06e31a7@157.90.233.96:9000/2";
 
@@ -214,7 +213,9 @@ public class SentryEventLogger implements IEventLogger
     @Override
     public void run()
     {
-      SentryEventLogger.INSTANCE._init();
+      IEventLogger instance = IEventLogger.getInstance();
+      if (instance instanceof SentryEventLogger)
+        ((SentryEventLogger) instance)._init();
     }
   }
 
