@@ -71,7 +71,7 @@ jobs:
         run: mvn --batch-mode install -U -T 1C "-Dmaven.javadoc.skip=true"
 
       - name: Maven / Integration Test
-        run: mvn test-compile failsafe:integration-test failsafe:verify
+        run: mvn --batch-mode test-compile failsafe:integration-test failsafe:verify
 
       - name: Save Maven cache
         uses: skjolber/maven-cache-github-action@v1
