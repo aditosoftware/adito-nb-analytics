@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * @author w.glanzer, 23.06.2022
  */
 @ServiceProvider(service = IEventLogger.class)
-class SentryEventLogger implements IEventLogger
+public class SentryEventLogger implements IEventLogger
 {
 
   protected static final SentryEventLogger INSTANCE = new SentryEventLogger();
