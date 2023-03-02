@@ -1,4 +1,4 @@
-package de.adito.aditoweb.nbm.metrics.impl.handlers.external;
+package de.adito.aditoweb.nbm.metrics.impl.eventlogger.sentry.handlers;
 
 import de.adito.aditoweb.nbm.metrics.api.types.Sampled;
 import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
@@ -6,14 +6,15 @@ import de.adito.aditoweb.nbm.metrics.impl.handlers.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * Logs all exceptions to the event logger
  *
- * @author w.glanzer, 10.10.2022
+ * @author w.glanzer, 02.03.2023
  */
 @MetricHandler(metric = Sampled.class)
-public class ExternalSampledMetricHandler implements IMetricHandler<Sampled>
+class SentrySampledMetricHandler implements IMetricHandler<Sampled>
 {
 
   @Override

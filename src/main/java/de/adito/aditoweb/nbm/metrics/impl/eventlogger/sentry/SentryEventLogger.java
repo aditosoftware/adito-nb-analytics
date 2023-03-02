@@ -1,7 +1,8 @@
-package de.adito.aditoweb.nbm.metrics.impl.eventlogger;
+package de.adito.aditoweb.nbm.metrics.impl.eventlogger.sentry;
 
 import de.adito.aditoweb.nbm.metrics.impl.InstallationID;
 import de.adito.aditoweb.nbm.metrics.impl.detectors.ThreadUtility;
+import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
 import de.adito.aditoweb.nbm.metrics.impl.user.IUserAgreement;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.sentry.*;

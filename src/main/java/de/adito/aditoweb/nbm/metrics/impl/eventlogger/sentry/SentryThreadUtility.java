@@ -1,4 +1,4 @@
-package de.adito.aditoweb.nbm.metrics.impl.eventlogger;
+package de.adito.aditoweb.nbm.metrics.impl.eventlogger.sentry;
 
 import io.sentry.protocol.*;
 import org.jetbrains.annotations.*;
