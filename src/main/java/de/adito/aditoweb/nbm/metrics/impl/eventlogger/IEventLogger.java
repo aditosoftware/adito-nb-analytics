@@ -1,9 +1,10 @@
 package de.adito.aditoweb.nbm.metrics.impl.eventlogger;
 
 import org.jetbrains.annotations.NotNull;
+import org.openide.util.Lookup;
 
 import java.lang.management.ThreadInfo;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -14,7 +15,7 @@ public interface IEventLogger
 
   static IEventLogger getInstance()
   {
-    return SentryEventLogger.INSTANCE;
+    return Objects.requireNonNull(Lookup.getDefault().lookup(IEventLogger.class));
   }
 
   /**

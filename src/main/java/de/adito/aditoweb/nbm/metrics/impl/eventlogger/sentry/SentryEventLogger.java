@@ -9,6 +9,7 @@ import io.sentry.protocol.*;
 import org.jetbrains.annotations.*;
 import org.netbeans.api.autoupdate.*;
 import org.openide.modules.*;
+import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.OnShowing;
 
 import java.lang.management.ThreadInfo;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 /**
  * @author w.glanzer, 23.06.2022
  */
+@ServiceProvider(service = IEventLogger.class)
 class SentryEventLogger implements IEventLogger
 {
 
