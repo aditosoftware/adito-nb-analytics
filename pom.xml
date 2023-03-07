@@ -49,7 +49,12 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.11.6</version>
+      <version>1.14.0</version>
+    </dependency>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy-agent</artifactId>
+      <version>1.14.0</version>
     </dependency>
     <dependency>
       <groupId>org.objenesis</groupId>
@@ -196,6 +201,13 @@
       <version>13.0</version>
       <scope>provided</scope>
       <optional>true</optional>
+    </dependency>
+
+    <!-- Lombok for additional annotations -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.26</version>
     </dependency>
   </dependencies>
 
