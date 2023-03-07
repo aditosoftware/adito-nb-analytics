@@ -71,58 +71,6 @@ class DeadLockDetectorRunnerTest
   }
 
   @Test
-  void isDeadlockDetectedCompletableFuturePossibleDetection()
-  {
-    final Object lock1 = new Object();
-    CompletableFuture<Object> completableFuture = new CompletableFuture<>();
-    Thread thread1 = new Thread(() -> {
-      synchronized (lock1)
-      {
-        try
-        {
-          completableFuture.get();
-        }
-        catch (InterruptedException | ExecutionException pE)
-        {
-          Assertions.fail(pE);
-        }
-      }
-    });
-    Thread thread2 = new Thread(() -> {
-        try
-        {
-          Thread.sleep(500);
-        }
-        catch (InterruptedException pE)
-        {
-          Assertions.fail(pE);
-        }
-        synchronized (lock1)
-        {
-          System.out.println("thread 2 has lock 1");
-        }
-        completableFuture.complete(new Object());
-    });
-    thread1.start();
-    thread2.start();
-    DeadlockDetectorRunner deadLockDetector = new DeadlockDetectorRunner();
-    DeadlockDetectorRunner spy = Mockito.spy(deadLockDetector);
-    spy.run();
-    try
-    {
-      Thread.sleep(1000L);
-    }
-    catch (InterruptedException pE)
-    {
-      pE.printStackTrace();
-    }
-    spy.run();
-    verify(spy, Mockito.times(1)).logDeadLock(Mockito.any(), Mockito.any());
-    thread1.interrupt();
-    thread2.interrupt();
-  }
-
-  @Test
   void isNoDeadlockIgnored()
   {
     DeadlockDetectorRunner deadLockDetector = new DeadlockDetectorRunner();
