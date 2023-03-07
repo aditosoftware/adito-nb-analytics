@@ -40,7 +40,7 @@ class InterceptableObjectFactoryTest
     proxyObject.test();
 
     // Verify
-    verify(handler, times(1)).invoke(proxyObject, _MyProxyObject.class.getDeclaredMethod("test"), new Object[0]);
+    verify(handler, times(1)).invoke(proxyObject, _MyProxyObject.class.getDeclaredMethod("test"), null);
     verify(object, times(1)).test();
   }
 
@@ -73,7 +73,7 @@ class InterceptableObjectFactoryTest
     assertEquals("myValue", proxyObject.test);
 
     // Verify
-    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithConstructor.class.getDeclaredMethod("getTest"), new Object[0]);
+    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithConstructor.class.getDeclaredMethod("getTest"), null);
     verify(object, times(1)).getTest();
   }
 
@@ -94,8 +94,8 @@ class InterceptableObjectFactoryTest
     proxyObject.run();
 
     // Verify
-    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithInterface.class.getDeclaredMethod("test"), new Object[0]);
-    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithInterface.class.getDeclaredMethod("run"), new Object[0]);
+    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithInterface.class.getDeclaredMethod("test"), null);
+    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithInterface.class.getDeclaredMethod("run"), null);
     verify(object, times(1)).test();
     verify(object, times(1)).run();
   }
@@ -117,8 +117,8 @@ class InterceptableObjectFactoryTest
     proxyObject.run();
 
     // Verify
-    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclass.class.getSuperclass().getDeclaredMethod("test"), new Object[0]);
-    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclass.class.getSuperclass().getDeclaredMethod("run"), new Object[0]);
+    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclass.class.getSuperclass().getDeclaredMethod("test"), null);
+    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclass.class.getSuperclass().getDeclaredMethod("run"), null);
     verify(object, times(1)).test();
     verify(object, times(1)).run();
   }
@@ -141,9 +141,9 @@ class InterceptableObjectFactoryTest
     proxyObject.call();
 
     // Verify
-    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclassAndInterface.class.getSuperclass().getDeclaredMethod("test"), new Object[0]);
-    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclassAndInterface.class.getSuperclass().getDeclaredMethod("run"), new Object[0]);
-    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclassAndInterface.class.getDeclaredMethod("call"), new Object[0]);
+    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclassAndInterface.class.getSuperclass().getDeclaredMethod("test"), null);
+    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclassAndInterface.class.getSuperclass().getDeclaredMethod("run"), null);
+    verify(handler, times(1)).invoke(proxyObject, _MyProxyObjectWithSuperclassAndInterface.class.getDeclaredMethod("call"), null);
     verify(object, times(1)).test();
     verify(object, times(1)).run();
     verify(object, times(1)).call();
