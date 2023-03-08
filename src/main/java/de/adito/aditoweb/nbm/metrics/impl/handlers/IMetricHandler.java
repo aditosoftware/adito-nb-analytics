@@ -22,12 +22,12 @@ public interface IMetricHandler<T extends Annotation>
    * Gets called before the original method
    *
    * @param pAnnotation Annotation that caused the metricHandler got triggered
-   * @param pObject     Target object of the method call
+   * @param pObject     Target object of the method call. NULL, if a static method was called.
    * @param pMethod     Method that got called
    * @param pArgs       Arguments of the method
    * @param pHints      Hints to be passed to the {@link IMetricHandler#afterMethod(Annotation, Object, Method, Object[], Object, Throwable, Map)} method
    */
-  default void beforeMethod(@NotNull T pAnnotation, @NotNull Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs, @NotNull Map<String, Object> pHints)
+  default void beforeMethod(@NotNull T pAnnotation, @Nullable Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs, @NotNull Map<String, Object> pHints)
       throws Exception
   {
   }
@@ -36,14 +36,14 @@ public interface IMetricHandler<T extends Annotation>
    * Gets called after the original method
    *
    * @param pAnnotation Annotation that caused the metricHandler got triggered
-   * @param pObject     Target object of the method call
+   * @param pObject     Target object of the method call. NULL, if a static method was called.
    * @param pMethod     Method that got called
    * @param pArgs       Arguments of the method
    * @param pResult     Return value of the method
    * @param pException  Exception if the method throwed one
    * @param pHints      Hints to get passed from the {@link IMetricHandler#beforeMethod(Annotation, Object, Method, Object[], Map)} method
    */
-  default void afterMethod(@NotNull T pAnnotation, @NotNull Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs,
+  default void afterMethod(@NotNull T pAnnotation, @Nullable Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs,
                            @Nullable Object pResult, @Nullable Throwable pException, @NotNull Map<String, Object> pHints) throws Exception
   {
   }
@@ -78,13 +78,13 @@ public interface IMetricHandler<T extends Annotation>
     /**
      * This method should be called before a metrified method will be called
      *
-     * @param pProxy            Object whose method gets called afterwards
+     * @param pProxy            Object whose method gets called afterwards. NULL, if a static method was called.
      * @param pMethod           Method that will be called
      * @param pAnnotatedElement Element that has the metric annotations on it
      * @param pArgs             Arguments of the method call
      * @param pHints            Hints to pass to the handlers
      */
-    public void beforeMethodCall(@NotNull Object pProxy, @NotNull Method pMethod, @NotNull AnnotatedElement pAnnotatedElement,
+    public void beforeMethodCall(@Nullable Object pProxy, @NotNull Method pMethod, @NotNull AnnotatedElement pAnnotatedElement,
                                  @NotNull Object[] pArgs, @NotNull Map<String, Object> pHints)
     {
       //noinspection unchecked,rawtypes
@@ -94,7 +94,7 @@ public interface IMetricHandler<T extends Annotation>
     /**
      * This method should be called after a metrified method was called
      *
-     * @param pProxy            Object whose method was called
+     * @param pProxy            Object whose method was called. NULL, if a static method was called.
      * @param pMethod           Method that was called
      * @param pAnnotatedElement Element that has the metric annotations on it
      * @param pArgs             Arguments of the method call
@@ -102,7 +102,7 @@ public interface IMetricHandler<T extends Annotation>
      * @param pMethodResult     Result of the method call
      * @param pException        Exception, if any occured during the method call
      */
-    public void afterMethodCall(@NotNull Object pProxy, @NotNull Method pMethod, @NotNull AnnotatedElement pAnnotatedElement, @NotNull Object[] pArgs,
+    public void afterMethodCall(@Nullable Object pProxy, @NotNull Method pMethod, @NotNull AnnotatedElement pAnnotatedElement, @NotNull Object[] pArgs,
                                 @NotNull Map<String, Object> pHints, @Nullable Object pMethodResult, @Nullable Throwable pException)
     {
       //noinspection unchecked,rawtypes

@@ -4,13 +4,15 @@ import com.google.common.collect.*;
 import de.adito.aditoweb.nbm.metrics.impl.handlers.IMetricHandler;
 import de.adito.aditoweb.nbm.metrics.impl.proxy.dynamic.IDynamicMetricProxyLoader;
 import lombok.*;
-import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.ByteBuddyAgent;
+import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
-import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
+import net.bytebuddy.matcher.ElementMatcher;
 import org.jetbrains.annotations.*;
 import org.openide.modules.Modules;
+import org.openide.util.Pair;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.lang.annotation.Annotation;
@@ -18,6 +20,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.*;
+import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -33,10 +36,10 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
   private static final Logger LOGGER = Logger.getLogger(DynamicMetricProxyLoaderImpl.class.getName());
   private static final AtomicBoolean BYTEBUDDYAGENT_INSTALLED = new AtomicBoolean(false);
   private static final AtomicBoolean BYTEBUDDYAGENT_RETRANSFORMABLE = new AtomicBoolean(false);
-  private static final Multimap<Class<?>, Annotation> PROXIED_ANNOTATIONS = HashMultimap.create();
+  private static final Multimap<Class<?>, Pair<ElementMatcher<MethodDescription>, Annotation>> PROXIED_ANNOTATIONS = HashMultimap.create();
 
   @Override
-  public void loadDynamicProxy(@NotNull Class<?> pClass, @NotNull Annotation pAnnotation)
+  public void loadDynamicProxy(@NotNull Class<?> pClass, @NotNull Annotation pAnnotation, @Nullable ElementMatcher<MethodDescription> pMatcher)
   {
     try
     {
@@ -52,19 +55,35 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
       }
 
       // Redefine class if possible and necessary
-      if (BYTEBUDDYAGENT_RETRANSFORMABLE.get() && PROXIED_ANNOTATIONS.put(pClass, pAnnotation))
-        //noinspection resource
-        new ByteBuddy()
-            .redefine(pClass)
+      if (BYTEBUDDYAGENT_RETRANSFORMABLE.get() && PROXIED_ANNOTATIONS.put(pClass, Pair.of(pMatcher, pAnnotation)))
+      {
+        // create matcher
+        ElementMatcher.Junction<MethodDescription> matcher = isMethod()
+            .and(not(isAbstract()));
 
-            // call tracing methods on method enter and exit
-            .visit(Advice.to(DynamicMetricAdvice.class)
-                       .on(isMethod()
-                               .and(not(isStatic()))
-                               .and(not(isAbstract()))))
+        // append own matcher
+        if (pMatcher != null)
+          matcher = matcher.and(pMatcher);
 
-            .make()
-            .load(pClass.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent(ClassReloadingStrategy.Strategy.REDEFINITION));
+        // install to agent
+        new AgentBuilder.Default()
+            .disableClassFormatChanges()
+
+            // Retransform classes
+            .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+
+            // Select the given class and all of its inner and subclasses
+            .type(named(pClass.getName())
+                      .or(nameStartsWith(pClass.getName() + "$")))
+
+            // Add advices
+            .transform(new AgentBuilder.Transformer.ForAdvice()
+                           .include(Thread.currentThread().getContextClassLoader(), pClass.getClassLoader())
+                           .advice(matcher, DynamicMetricAdvice.class.getName()))
+
+            // Install to agent
+            .installOnByteBuddyAgent();
+      }
     }
     catch (Throwable e) //NOSONAR catch everything, including NoSuchMethodError
     {
@@ -88,22 +107,21 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
      * @param pTarget    Target object that was instrumented (mainly known as "this")
      * @param pMethod    Method that was instrumented
      * @param pArguments Arguments of the method
-     * @param pHints     Hints field to be used in metric handlers
      */
     @SneakyThrows // will be suppressed by byte-buddy
     @Advice.OnMethodEnter(suppress = Throwable.class)
-    public static void onMethodEnter(@Advice.This(typing = Assigner.Typing.DYNAMIC) Object pTarget,
-                                     @Advice.Origin Method pMethod, @Advice.AllArguments Object[] pArguments,
-                                     @SuppressWarnings("ParameterCanBeLocal") @Advice.Local("metric_hints") Map<String, Object> pHints)
+    public static Map<String, Object> onMethodEnter(@Advice.This(typing = Assigner.Typing.DYNAMIC, optional = true) Object pTarget,
+                                                    @Advice.Origin Method pMethod, @Advice.AllArguments Object[] pArguments)
     {
-      // declare hints to be used in the exit-method too
-      pHints = new HashMap<>(); // NOSONAR has to be reassigned, because byte-buddy refers to the original reference
+      Map<String, Object> hints = new HashMap<>();
 
       // invoke method
       Modules.getDefault().findCodeNameBase("de.adito.aditoweb.nbm.analytics").getClassLoader()
           .loadClass("de.adito.aditoweb.nbm.metrics.impl.proxy.DynamicMetricProxyLoaderImpl$DynamicMetricInvocation")
           .getDeclaredMethod("methodEntered", Object.class, Method.class, Object[].class, Map.class)
-          .invoke(null, pTarget, pMethod, pArguments, pHints);
+          .invoke(null, pTarget, pMethod, pArguments, hints);
+
+      return hints;
     }
 
     /**
@@ -113,15 +131,15 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
      * @param pTarget      Target object that was instrumented (mainly known as "this")
      * @param pMethod      Method that was instrumented
      * @param pArguments   Arguments of the method
-     * @param pHints       Hints field to be used in metric handlers
+     * @param pHints       Hints to be used in metric handlers
      * @param pReturnValue Object that the instrumented method returned. NULL if an exception occured
      * @param pThrowable   Exception that the instrumented method throwed. NULL if no exception was thrown during execution.
      */
     @SneakyThrows // will be suppressed by byte-buddy
     @Advice.OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
-    public static void onMethodExit(@Advice.This(typing = Assigner.Typing.DYNAMIC) Object pTarget,
+    public static void onMethodExit(@Advice.This(typing = Assigner.Typing.DYNAMIC, optional = true) Object pTarget,
                                     @Advice.Origin Method pMethod, @Advice.AllArguments Object[] pArguments,
-                                    @Advice.Local("metric_hints") Map<String, Object> pHints,
+                                    @Advice.Enter Map<String, Object> pHints,
                                     @Advice.Return(typing = Assigner.Typing.DYNAMIC) Object pReturnValue,
                                     @Advice.Thrown(typing = Assigner.Typing.DYNAMIC) Throwable pThrowable)
     {
@@ -151,9 +169,9 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
      * @param pArguments Arguments of the method
      * @param pHints     Hints field to be used in metric handlers
      */
-    public static void methodEntered(@NotNull Object pTarget, @NotNull Method pMethod, @NotNull Object[] pArguments, @NotNull Map<String, Object> pHints)
+    public static void methodEntered(@Nullable Object pTarget, @NotNull Method pMethod, @NotNull Object[] pArguments, @NotNull Map<String, Object> pHints)
     {
-      ACCESSOR.beforeMethodCall(pTarget, pMethod, new DynamicAnnotatedElement(pMethod, PROXIED_ANNOTATIONS.get(pMethod.getDeclaringClass())), pArguments, pHints);
+      ACCESSOR.beforeMethodCall(pTarget, pMethod, new DynamicAnnotatedElement(pMethod, findAnnotationsForMethod(pMethod)), pArguments, pHints);
     }
 
     /**
@@ -166,11 +184,29 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
      * @param pReturnValue Object that the instrumented method returned. NULL if an exception occured
      * @param pThrowable   Exception that the instrumented method throwed. NULL if no exception was thrown during execution.
      */
-    public static void methodExited(@NotNull Object pTarget, @NotNull Method pMethod, @NotNull Object[] pArguments, @NotNull Map<String, Object> pHints,
+    public static void methodExited(@Nullable Object pTarget, @NotNull Method pMethod, @NotNull Object[] pArguments, @NotNull Map<String, Object> pHints,
                                     @Nullable Object pReturnValue, @Nullable Throwable pThrowable)
     {
-      ACCESSOR.afterMethodCall(pTarget, pMethod, new DynamicAnnotatedElement(pMethod, PROXIED_ANNOTATIONS.get(pMethod.getDeclaringClass())),
-                               pArguments, pHints, pReturnValue, pThrowable);
+      ACCESSOR.afterMethodCall(pTarget, pMethod, new DynamicAnnotatedElement(pMethod, findAnnotationsForMethod(pMethod)), pArguments, pHints, pReturnValue, pThrowable);
+    }
+
+    /**
+     * Returns all annotations that the given one should process additionally
+     *
+     * @param pMethod Method to get the annotations for
+     * @return the annotations
+     */
+    @NotNull
+    private static List<Annotation> findAnnotationsForMethod(@NotNull Method pMethod)
+    {
+      Collection<Pair<ElementMatcher<MethodDescription>, Annotation>> cached = PROXIED_ANNOTATIONS.get(pMethod.getDeclaringClass());
+      if (cached == null)
+        return List.of();
+
+      return cached.stream()
+          .filter(pPair -> pPair.first() == null || pPair.first().matches(new MethodDescription.ForLoadedMethod(pMethod)))
+          .map(Pair::second)
+          .collect(Collectors.toList());
     }
 
     /**

@@ -3,7 +3,7 @@ package de.adito.aditoweb.nbm.metrics.impl.eventlogger.sentry.handlers;
 import de.adito.aditoweb.nbm.metrics.api.types.Sampled;
 import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
 import de.adito.aditoweb.nbm.metrics.impl.handlers.*;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -18,7 +18,7 @@ class SentrySampledMetricHandler implements IMetricHandler<Sampled>
 {
 
   @Override
-  public void beforeMethod(@NotNull Sampled pAnnotation, @NotNull Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs,
+  public void beforeMethod(@NotNull Sampled pAnnotation, @Nullable Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs,
                            @NotNull Map<String, Object> pHints)
   {
     // Check if this execution should be handled by an external event logger

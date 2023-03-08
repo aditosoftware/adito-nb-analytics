@@ -1,6 +1,8 @@
 package de.adito.aditoweb.nbm.metrics.impl.proxy.dynamic;
 
-import org.jetbrains.annotations.NotNull;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.matcher.ElementMatcher;
+import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
 
@@ -14,12 +16,13 @@ public interface IDynamicMetricProxyLoader
 {
 
   /**
-   * Injects the given annotation into all instance
-   * methods (which are not static and not abstract) of the given class.
+   * Injects the given annotation into all methods (which are not abstract) of the given class.
+   * All inner classes of the given one will be touched too.
    *
    * @param pClass      Class to inject the annotations to
    * @param pAnnotation Annotation to be injected
+   * @param pMatcher    additional matcher to add, null will be ignored
    */
-  void loadDynamicProxy(@NotNull Class<?> pClass, @NotNull Annotation pAnnotation);
+  void loadDynamicProxy(@NotNull Class<?> pClass, @NotNull Annotation pAnnotation, @Nullable ElementMatcher<MethodDescription> pMatcher);
 
 }

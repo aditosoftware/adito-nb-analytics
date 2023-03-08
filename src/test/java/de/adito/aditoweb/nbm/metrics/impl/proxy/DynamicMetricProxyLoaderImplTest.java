@@ -55,7 +55,7 @@ class DynamicMetricProxyLoaderImplTest
     @BeforeEach
     void setUp()
     {
-      proxyLoader.loadDynamicProxy(MyTestClass.class, new MyTestMethod.Instance());
+      proxyLoader.loadDynamicProxy(MyTestClass.class, new MyTestMethod.Instance(), null);
 
       // Handler to spy on
       methodHandler = mock(MyTestMethodHandler.class);
@@ -112,6 +112,22 @@ class DynamicMetricProxyLoaderImplTest
       order.verify(methodHandler, times(1)).beforeMethod(notNull(), eq(object), notNull(), eq(new Object[]{}), eq(Map.of()));
       order.verify(methodHandler, times(1)).afterMethod(notNull(), eq(object), notNull(), eq(new Object[]{}), isNull(), isNotNull(), eq(Map.of()));
     }
+
+    /**
+     * ... on a regular static method
+     */
+    @Test
+    @SneakyThrows
+    void onStaticMethod()
+    {
+      // do a static dummy call
+      MyTestClass.doStaticDummyCall();
+
+      // verify handler call
+      InOrder order = inOrder(methodHandler);
+      order.verify(methodHandler, times(1)).beforeMethod(notNull(), isNull(), notNull(), eq(new Object[]{}), eq(Map.of()));
+      order.verify(methodHandler, times(1)).afterMethod(notNull(), isNull(), notNull(), eq(new Object[]{}), isNull(), isNull(), eq(Map.of()));
+    }
   }
 
   /**
@@ -151,6 +167,13 @@ class DynamicMetricProxyLoaderImplTest
     {
       throw new Exception();
     }
+
+    /**
+     * Static method, without anything special
+     */
+    public static void doStaticDummyCall()
+    {
+    }
   }
 
   /**
@@ -162,7 +185,7 @@ class DynamicMetricProxyLoaderImplTest
     private static IMetricHandler<MyTestMethod> delegate;
 
     @Override
-    public void beforeMethod(@NotNull MyTestMethod pAnnotation, @NotNull Object pObject, @NotNull Method pMethod,
+    public void beforeMethod(@Nullable MyTestMethod pAnnotation, @NotNull Object pObject, @NotNull Method pMethod,
                              @NotNull Object[] pArgs, @NotNull Map<String, Object> pHints)
         throws Exception
     {
@@ -170,7 +193,7 @@ class DynamicMetricProxyLoaderImplTest
     }
 
     @Override
-    public void afterMethod(@NotNull MyTestMethod pAnnotation, @NotNull Object pObject, @NotNull Method pMethod,
+    public void afterMethod(@Nullable MyTestMethod pAnnotation, @NotNull Object pObject, @NotNull Method pMethod,
                             @NotNull Object[] pArgs, @Nullable Object pResult, @Nullable Throwable pException, @NotNull Map<String, Object> pHints)
         throws Exception
     {
