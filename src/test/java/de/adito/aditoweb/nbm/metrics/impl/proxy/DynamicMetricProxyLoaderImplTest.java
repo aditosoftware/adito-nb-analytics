@@ -185,7 +185,7 @@ class DynamicMetricProxyLoaderImplTest
     private static IMetricHandler<MyTestMethod> delegate;
 
     @Override
-    public void beforeMethod(@Nullable MyTestMethod pAnnotation, @NotNull Object pObject, @NotNull Method pMethod,
+    public void beforeMethod(@NotNull MyTestMethod pAnnotation, @Nullable Object pObject, @NotNull Method pMethod,
                              @NotNull Object[] pArgs, @NotNull Map<String, Object> pHints)
         throws Exception
     {
@@ -193,7 +193,7 @@ class DynamicMetricProxyLoaderImplTest
     }
 
     @Override
-    public void afterMethod(@Nullable MyTestMethod pAnnotation, @NotNull Object pObject, @NotNull Method pMethod,
+    public void afterMethod(@NotNull MyTestMethod pAnnotation, @Nullable Object pObject, @NotNull Method pMethod,
                             @NotNull Object[] pArgs, @Nullable Object pResult, @Nullable Throwable pException, @NotNull Map<String, Object> pHints)
         throws Exception
     {
