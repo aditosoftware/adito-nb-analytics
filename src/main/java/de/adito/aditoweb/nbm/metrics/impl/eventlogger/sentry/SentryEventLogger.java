@@ -109,6 +109,7 @@ public class SentryEventLogger implements IEventLogger
               pOptions.setCacheDirPath(Places.getCacheSubdirectory("analytics").getAbsolutePath());
               pOptions.setEnableAutoSessionTracking(true);
               pOptions.setSessionTrackingIntervalMillis(30000);
+              pOptions.setTracesSampleRate(1.0);
             });
             Sentry.startSession();
             Sentry.configureScope(pScope -> {
