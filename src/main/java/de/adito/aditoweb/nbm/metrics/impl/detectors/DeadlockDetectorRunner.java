@@ -1,7 +1,7 @@
 package de.adito.aditoweb.nbm.metrics.impl.detectors;
 
 import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import java.lang.management.*;
 import java.util.*;
@@ -39,7 +39,7 @@ class DeadlockDetectorRunner implements Runnable
     }
   }
 
-  void logDeadLock(@NotNull List<ThreadInfo> pDeadLockedThreads, @NotNull ThreadInfo[] pAllThreadInfos)
+  void logDeadLock(@NonNull List<ThreadInfo> pDeadLockedThreads, @NonNull ThreadInfo[] pAllThreadInfos)
   {
     Set<String> currentDeadlockedThreadNames = pDeadLockedThreads.stream()
         .map(ThreadInfo::getThreadName)

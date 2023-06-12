@@ -1,7 +1,7 @@
 package de.adito.aditoweb.nbm.metrics.impl.handlers;
 
 import de.adito.picoservice.PicoService;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import java.lang.annotation.*;
 
@@ -20,7 +20,7 @@ public @interface MetricHandler
   /**
    * @return Annotation that this metric handler can handle
    */
-  @NotNull
+  @NonNull
   Class<? extends Annotation> metric();
 
 }

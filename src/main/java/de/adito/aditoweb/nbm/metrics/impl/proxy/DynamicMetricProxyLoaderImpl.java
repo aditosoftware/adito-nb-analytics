@@ -39,7 +39,7 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
   private static final Multimap<Class<?>, Pair<ElementMatcher<MethodDescription>, Annotation>> PROXIED_ANNOTATIONS = HashMultimap.create();
 
   @Override
-  public void loadDynamicProxy(@NotNull Class<?> pClass, @NotNull Annotation pAnnotation, @Nullable ElementMatcher<MethodDescription> pMatcher)
+  public void loadDynamicProxy(@NonNull Class<?> pClass, @NonNull Annotation pAnnotation, @Nullable ElementMatcher<MethodDescription> pMatcher)
   {
     try
     {
@@ -169,7 +169,7 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
      * @param pArguments Arguments of the method
      * @param pHints     Hints field to be used in metric handlers
      */
-    public static void methodEntered(@Nullable Object pTarget, @NotNull Method pMethod, @NotNull Object[] pArguments, @NotNull Map<String, Object> pHints)
+    public static void methodEntered(@Nullable Object pTarget, @NonNull Method pMethod, @NonNull Object[] pArguments, @NonNull Map<String, Object> pHints)
     {
       ACCESSOR.beforeMethodCall(pTarget, pMethod, new DynamicAnnotatedElement(pMethod, findAnnotationsForMethod(pMethod)), pArguments, pHints);
     }
@@ -184,7 +184,7 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
      * @param pReturnValue Object that the instrumented method returned. NULL if an exception occured
      * @param pThrowable   Exception that the instrumented method throwed. NULL if no exception was thrown during execution.
      */
-    public static void methodExited(@Nullable Object pTarget, @NotNull Method pMethod, @NotNull Object[] pArguments, @NotNull Map<String, Object> pHints,
+    public static void methodExited(@Nullable Object pTarget, @NonNull Method pMethod, @NonNull Object[] pArguments, @NonNull Map<String, Object> pHints,
                                     @Nullable Object pReturnValue, @Nullable Throwable pThrowable)
     {
       ACCESSOR.afterMethodCall(pTarget, pMethod, new DynamicAnnotatedElement(pMethod, findAnnotationsForMethod(pMethod)), pArguments, pHints, pReturnValue, pThrowable);
@@ -196,8 +196,8 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
      * @param pMethod Method to get the annotations for
      * @return the annotations
      */
-    @NotNull
-    private static List<Annotation> findAnnotationsForMethod(@NotNull Method pMethod)
+    @NonNull
+    private static List<Annotation> findAnnotationsForMethod(@NonNull Method pMethod)
     {
       Collection<Pair<ElementMatcher<MethodDescription>, Annotation>> cached = PROXIED_ANNOTATIONS.get(pMethod.getDeclaringClass());
       if (cached == null)
@@ -215,14 +215,14 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
     @RequiredArgsConstructor
     private static class DynamicAnnotatedElement implements AnnotatedElement
     {
-      @NotNull
+      @NonNull
       private final AnnotatedElement base;
 
-      @NotNull
+      @NonNull
       private final Collection<Annotation> additionalAnnotations;
 
       @Override
-      public <T extends Annotation> T getAnnotation(@NotNull Class<T> annotationClass)
+      public <T extends Annotation> T getAnnotation(@NonNull Class<T> annotationClass)
       {
         for (Annotation additionalAnnotation : additionalAnnotations)
           if (additionalAnnotation.annotationType().isAssignableFrom(annotationClass))

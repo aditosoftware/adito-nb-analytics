@@ -1,6 +1,7 @@
 package de.adito.aditoweb.nbm.metrics.impl.eventlogger.sentry;
 
 import io.sentry.protocol.*;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 
 import java.lang.management.ThreadInfo;
@@ -20,7 +21,7 @@ class SentryThreadUtility
    * @param thread the thread to be converted
    * @return a SentryThread
    */
-  public static @NotNull SentryThread getSentryThread(@NotNull ThreadInfo thread)
+  public static @NonNull SentryThread getSentryThread(@NonNull ThreadInfo thread)
   {
     SentryThread sentryThread = new SentryThread();
 

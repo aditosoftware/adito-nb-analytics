@@ -7,6 +7,7 @@ import de.adito.aditoweb.nbm.metrics.impl.user.IUserAgreement;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.sentry.*;
 import io.sentry.protocol.*;
+import lombok.NonNull;
 import org.jetbrains.annotations.*;
 import org.netbeans.api.autoupdate.*;
 import org.openide.modules.*;
@@ -42,14 +43,14 @@ public class SentryEventLogger implements IEventLogger
   private int lastSentEdtStackTraceHash = 0;
 
   @Override
-  public void captureRegularException(@NotNull Throwable pException)
+  public void captureRegularException(@NonNull Throwable pException)
   {
     if (!IGNORED_EXCEPTIONS.contains(pException.getClass().getName()))
       _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.ERROR, null, pException, null)));
   }
 
   @Override
-  public void captureThreadDeadlock(@NotNull List<ThreadInfo> pDeadLockedThreads, @NotNull ThreadInfo[] pAllThreadInfos)
+  public void captureThreadDeadlock(@NonNull List<ThreadInfo> pDeadLockedThreads, @NonNull ThreadInfo[] pAllThreadInfos)
   {
     _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.ERROR, pDeadLockedThreads, null, "Deadlocked Threads"),
                                               Hint.withAttachment(new Attachment(ThreadUtility.getThreadDump(pAllThreadInfos).getBytes(StandardCharsets.UTF_8),
@@ -57,7 +58,7 @@ public class SentryEventLogger implements IEventLogger
   }
 
   @Override
-  public void captureEDTStress(@NotNull ThreadInfo pEdtInfo, @NotNull Supplier<ThreadInfo[]> pAllThreadInfos)
+  public void captureEDTStress(@NonNull ThreadInfo pEdtInfo, @NonNull Supplier<ThreadInfo[]> pAllThreadInfos)
   {
     boolean ignoreEDT = false;
     boolean containsAditoTrace = false;
@@ -132,7 +133,7 @@ public class SentryEventLogger implements IEventLogger
    *
    * @param pRunnable Runnable to execute
    */
-  private void _catchException(@NotNull Runnable pRunnable)
+  private void _catchException(@NonNull Runnable pRunnable)
   {
     try
     {
@@ -144,8 +145,8 @@ public class SentryEventLogger implements IEventLogger
     }
   }
 
-  @NotNull
-  private SentryEvent _createEvent(@NotNull SentryLevel pLevel, @Nullable Collection<ThreadInfo> pThreadInfos, @Nullable Throwable pThrowable, @Nullable String pTitle)
+  @NonNull
+  private SentryEvent _createEvent(@NonNull SentryLevel pLevel, @Nullable Collection<ThreadInfo> pThreadInfos, @Nullable Throwable pThrowable, @Nullable String pTitle)
   {
     SentryEvent event = new SentryEvent();
     event.setLevel(pLevel);
@@ -175,7 +176,7 @@ public class SentryEventLogger implements IEventLogger
   /**
    * @return all installed ADITO plugins with the name as key and the version as value
    */
-  @NotNull
+  @NonNull
   private Map<String, String> getInstalledPlugins()
   {
     return UpdateManager.getDefault().getUpdateUnits(UpdateManager.TYPE.KIT_MODULE).stream()
@@ -191,8 +192,8 @@ public class SentryEventLogger implements IEventLogger
    * @param pElement Element to get the ID for
    * @return the ID
    */
-  @NotNull
-  private String getPluginID(@NotNull UpdateElement pElement)
+  @NonNull
+  private String getPluginID(@NonNull UpdateElement pElement)
   {
     // ID based on codeName
     String id = pElement.getCodeName();

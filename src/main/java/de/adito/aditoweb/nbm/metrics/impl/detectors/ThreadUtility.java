@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.metrics.impl.detectors;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import java.lang.management.*;
 import java.util.*;
@@ -19,8 +19,8 @@ public class ThreadUtility
    */
   @SuppressWarnings({"StringConcatenationInsideStringBufferAppend", "DuplicateBranchesInSwitch"}) // Method copied from ThreadInfo,
   // keep intact as much as possible
-  @NotNull
-  static String getThreadInfoStacktrace(@NotNull ThreadInfo pThreadInfo)
+  @NonNull
+  static String getThreadInfoStacktrace(@NonNull ThreadInfo pThreadInfo)
   {
     StringBuilder sb = new StringBuilder("\"" + pThreadInfo.getThreadName() + "\"" +
                                              (pThreadInfo.isDaemon() ? " daemon" : "") +
@@ -105,16 +105,16 @@ public class ThreadUtility
    * @param pAllThreadInfos ThreadInfos, their depth for the stacktraceElements should be Integer.MAX_VALUE
    * @return ThreadDump as String, formatted similar to a Threaddump that would be acquired via VisualVM
    */
-  @NotNull
-  public static String getThreadDump(@NotNull ThreadInfo[] pAllThreadInfos)
+  @NonNull
+  public static String getThreadDump(@NonNull ThreadInfo[] pAllThreadInfos)
   {
     return Arrays.stream(pAllThreadInfos)
         .map(ThreadUtility::getThreadInfoStacktrace)
         .collect(Collectors.joining("\n"));
   }
 
-  @NotNull
-  public static String getDeadlockedThreadsAsString(@NotNull List<?> pDeadlockedThreads)
+  @NonNull
+  public static String getDeadlockedThreadsAsString(@NonNull List<?> pDeadlockedThreads)
   {
     return "Deadlocked Threads:\n" + pDeadlockedThreads.stream()
         .filter(pObj -> pObj instanceof ThreadInfo)

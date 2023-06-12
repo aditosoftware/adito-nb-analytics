@@ -1,11 +1,11 @@
 package de.adito.aditoweb.nbm.metrics.impl.proxy;
 
+import lombok.NonNull;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.implementation.attribute.MethodAttributeAppender;
 import net.bytebuddy.matcher.ElementMatchers;
-import org.jetbrains.annotations.NotNull;
 import org.objenesis.ObjenesisStd;
 
 import java.lang.invoke.MethodHandles;
@@ -20,9 +20,9 @@ class InterceptableObjectFactory implements IInterceptableObjectFactory
 
   private static final Logger _LOGGER = Logger.getLogger(InterceptableObjectFactory.class.getName());
 
-  @NotNull
+  @NonNull
   @Override
-  public <T> T createInterceptableProxy(@NotNull T pObject, @NotNull InvocationHandler pHandler) throws IllegalAccessException
+  public <T> T createInterceptableProxy(@NonNull T pObject, @NonNull InvocationHandler pHandler) throws IllegalAccessException
   {
     Class<?> type = new ByteBuddy()
         .subclass(pObject.getClass())
@@ -45,8 +45,8 @@ class InterceptableObjectFactory implements IInterceptableObjectFactory
    * @param pDestination Target object
    * @return the target object after it was modified
    */
-  @NotNull
-  private <T> T _copyProperties(@NotNull T pOriginal, @NotNull T pDestination)
+  @NonNull
+  private <T> T _copyProperties(@NonNull T pOriginal, @NonNull T pDestination)
   {
     Class<?> clsType = pOriginal.getClass();
     while (clsType != null)
