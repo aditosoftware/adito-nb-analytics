@@ -3,7 +3,7 @@ package de.adito.aditoweb.nbm.metrics.impl.user;
 import de.adito.util.reactive.cache.ObservableCache;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.*;
 import org.openide.util.*;
 
@@ -22,14 +22,14 @@ class UserAgreement implements IUserAgreement.IMutableUserAgreement
   private final ObservableCache observableCache = new ObservableCache();
   private final BehaviorSubject<Boolean> hasAgreedSendingAnalytics = BehaviorSubject.createDefault(false);
 
-  @NotNull
+  @NonNull
   @Override
   public Observable<Boolean> sendingAnalyticsAllowed()
   {
     return observableCache.calculate("sendingAnalyticsAllowed", () -> hasAgreedSendingAnalytics);
   }
 
-  @NotNull
+  @NonNull
   @Override
   public IMutableUserAgreement getMutable()
   {
@@ -48,7 +48,7 @@ class UserAgreement implements IUserAgreement.IMutableUserAgreement
    *
    * @return the agreement
    */
-  @NotNull
+  @NonNull
   protected UserAgreement ensureInited()
   {
     synchronized (initLock) // lock, because we do not want to show the dialog twice

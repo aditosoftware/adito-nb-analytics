@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.metrics.impl.eventlogger;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.util.Lookup;
 
 import java.lang.management.ThreadInfo;
@@ -23,7 +23,7 @@ public interface IEventLogger
    *
    * @param pException Exception that was catched
    */
-  void captureRegularException(@NotNull Throwable pException);
+  void captureRegularException(@NonNull Throwable pException);
 
   /**
    * Captures a thread deadlock
@@ -31,7 +31,7 @@ public interface IEventLogger
    * @param pDeadLockedThreads Threads that deadlocked
    * @param pAllThreadInfos    All Threads
    */
-  void captureThreadDeadlock(@NotNull List<ThreadInfo> pDeadLockedThreads, @NotNull ThreadInfo[] pAllThreadInfos);
+  void captureThreadDeadlock(@NonNull List<ThreadInfo> pDeadLockedThreads, @NonNull ThreadInfo[] pAllThreadInfos);
 
   /**
    * Captured, that the EDT is under heavy load
@@ -39,6 +39,6 @@ public interface IEventLogger
    * @param pThreadInfo     EDT-Info
    * @param pAllThreadInfos Supplier for retrieving all threads infos (stacktrace etc.)
    */
-  void captureEDTStress(@NotNull ThreadInfo pThreadInfo, @NotNull Supplier<ThreadInfo[]> pAllThreadInfos);
+  void captureEDTStress(@NonNull ThreadInfo pThreadInfo, @NonNull Supplier<ThreadInfo[]> pAllThreadInfos);
 
 }

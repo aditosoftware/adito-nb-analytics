@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.metrics.impl.proxy;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.junit.jupiter.api.*;
 
 import java.lang.reflect.*;
@@ -151,7 +151,7 @@ class InterceptableObjectFactoryTest
 
   private static class _MyProxyObject
   {
-    @NotNull
+    @NonNull
     public String test()
     {
       return getClass().getName();
@@ -161,7 +161,7 @@ class InterceptableObjectFactoryTest
   private static class _MyProxyObjectAnnotations
   {
     @MyAnnotation
-    @NotNull
+    @NonNull
     public String test()
     {
       return getClass().getName();
@@ -172,12 +172,12 @@ class InterceptableObjectFactoryTest
   {
     private final String test;
 
-    public _MyProxyObjectWithConstructor(@NotNull String pTest)
+    public _MyProxyObjectWithConstructor(@NonNull String pTest)
     {
       test = pTest;
     }
 
-    @NotNull
+    @NonNull
     public String getTest()
     {
       return test;
@@ -192,7 +192,7 @@ class InterceptableObjectFactoryTest
 
     }
 
-    @NotNull
+    @NonNull
     public String test()
     {
       return getClass().getName();

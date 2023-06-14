@@ -1,7 +1,7 @@
 package de.adito.aditoweb.nbm.metrics.impl.user;
 
 import io.reactivex.rxjava3.core.Observable;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 /**
  * Contains all necessary information, what a user wants to send
@@ -14,7 +14,7 @@ public interface IUserAgreement
   /**
    * @return the singleton instance
    */
-  @NotNull
+  @NonNull
   static IUserAgreement getInstance()
   {
     return UserAgreement.INSTANCE.ensureInited();
@@ -26,13 +26,13 @@ public interface IUserAgreement
    *
    * @return true, if allowed, false otherwise
    */
-  @NotNull
+  @NonNull
   Observable<Boolean> sendingAnalyticsAllowed();
 
   /**
    * @return a mutable instance
    */
-  @NotNull
+  @NonNull
   IMutableUserAgreement getMutable();
 
   interface IMutableUserAgreement extends IUserAgreement

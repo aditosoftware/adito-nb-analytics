@@ -185,16 +185,16 @@ class DynamicMetricProxyLoaderImplTest
     private static IMetricHandler<MyTestMethod> delegate;
 
     @Override
-    public void beforeMethod(@NotNull MyTestMethod pAnnotation, @Nullable Object pObject, @NotNull Method pMethod,
-                             @NotNull Object[] pArgs, @NotNull Map<String, Object> pHints)
+    public void beforeMethod(@NonNull MyTestMethod pAnnotation, @Nullable Object pObject, @NonNull Method pMethod,
+                             @NonNull Object[] pArgs, @NonNull Map<String, Object> pHints)
         throws Exception
     {
       delegate.beforeMethod(pAnnotation, pObject, pMethod, pArgs, pHints);
     }
 
     @Override
-    public void afterMethod(@NotNull MyTestMethod pAnnotation, @Nullable Object pObject, @NotNull Method pMethod,
-                            @NotNull Object[] pArgs, @Nullable Object pResult, @Nullable Throwable pException, @NotNull Map<String, Object> pHints)
+    public void afterMethod(@NonNull MyTestMethod pAnnotation, @Nullable Object pObject, @NonNull Method pMethod,
+                            @NonNull Object[] pArgs, @Nullable Object pResult, @Nullable Throwable pException, @NonNull Map<String, Object> pHints)
         throws Exception
     {
       delegate.afterMethod(pAnnotation, pObject, pMethod, pArgs, pResult, pException, pHints);

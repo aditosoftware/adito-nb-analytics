@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.metrics.impl;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.modules.OnStart;
 import org.openide.util.NbPreferences;
 
@@ -24,7 +24,7 @@ public class InstallationID
   /**
    * @return the instance of the current installation id
    */
-  @NotNull
+  @NonNull
   public static InstallationID get()
   {
     if (_INSTANCE == null)
@@ -42,7 +42,7 @@ public class InstallationID
     return _INSTANCE;
   }
 
-  private InstallationID(@NotNull String pValue)
+  private InstallationID(@NonNull String pValue)
   {
     value = pValue;
   }
@@ -50,7 +50,7 @@ public class InstallationID
   /**
    * @return the textual interpretation of the installation id
    */
-  @NotNull
+  @NonNull
   public String asText()
   {
     return getID() + "-" + getVersion();
@@ -59,7 +59,7 @@ public class InstallationID
   /**
    * @return the installation id without version
    */
-  @NotNull
+  @NonNull
   public String getID()
   {
     return value;
@@ -77,7 +77,7 @@ public class InstallationID
   /**
    * @return the adito version
    */
-  @NotNull
+  @NonNull
   public String getVersion()
   {
     if (aditoVersion == null)

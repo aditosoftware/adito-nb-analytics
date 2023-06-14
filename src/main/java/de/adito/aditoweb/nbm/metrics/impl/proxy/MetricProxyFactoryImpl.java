@@ -2,7 +2,7 @@ package de.adito.aditoweb.nbm.metrics.impl.proxy;
 
 import de.adito.aditoweb.nbm.metrics.api.IMetricProxyFactory;
 import de.adito.aditoweb.nbm.metrics.impl.handlers.IMetricHandler;
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.lang.reflect.*;
@@ -21,15 +21,15 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
   private final IInterceptableObjectFactory objectFactory = new InterceptableObjectFactory();
 
   @Override
-  public boolean canCreateProxy(@NotNull Object pObject)
+  public boolean canCreateProxy(@NonNull Object pObject)
   {
     // proxy everything, if enabled
     return true;
   }
 
-  @NotNull
+  @NonNull
   @Override
-  public <T> T createProxy(@NotNull T pObject)
+  public <T> T createProxy(@NonNull T pObject)
   {
     try
     {
@@ -53,7 +53,7 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
     private final IMetricHandler.Accessor metricHandlerAccessor = new IMetricHandler.Accessor();
     private final T object;
 
-    public _MetricInvocationHandler(@NotNull T pObject)
+    public _MetricInvocationHandler(@NonNull T pObject)
     {
       object = pObject;
     }

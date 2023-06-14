@@ -1,6 +1,6 @@
 package de.adito.aditoweb.nbm.metrics.impl.proxy;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
 
 import java.lang.reflect.InvocationHandler;
 
@@ -19,7 +19,7 @@ public interface IInterceptableObjectFactory
    * @param pHandler Handler to intercept methods
    * @return A proxy object that delegates every method call to pHandler
    */
-  @NotNull
-  <T> T createInterceptableProxy(@NotNull T pObject, @NotNull InvocationHandler pHandler) throws IllegalAccessException;
+  @NonNull
+  <T> T createInterceptableProxy(@NonNull T pObject, @NonNull InvocationHandler pHandler) throws IllegalAccessException;
 
 }

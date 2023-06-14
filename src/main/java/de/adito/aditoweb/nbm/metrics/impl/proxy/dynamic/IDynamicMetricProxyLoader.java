@@ -1,5 +1,6 @@
 package de.adito.aditoweb.nbm.metrics.impl.proxy.dynamic;
 
+import lombok.NonNull;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.jetbrains.annotations.*;
@@ -23,6 +24,6 @@ public interface IDynamicMetricProxyLoader
    * @param pAnnotation Annotation to be injected
    * @param pMatcher    additional matcher to add, null will be ignored
    */
-  void loadDynamicProxy(@NotNull Class<?> pClass, @NotNull Annotation pAnnotation, @Nullable ElementMatcher<MethodDescription> pMatcher);
+  void loadDynamicProxy(@NonNull Class<?> pClass, @NonNull Annotation pAnnotation, @Nullable ElementMatcher<MethodDescription> pMatcher);
 
 }
