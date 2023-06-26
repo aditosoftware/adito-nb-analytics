@@ -4,10 +4,10 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.adito.aditoweb.nbm.metrics.impl.bugreports.*;
 import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
 import de.adito.aditoweb.nbm.metrics.impl.user.IUserAgreement;
+import de.adito.aditoweb.nbm.metrics.impl.util.AnalyticsOnStopHook;
 import de.adito.notification.INotificationFacade;
 import de.adito.swing.TableLayoutUtil;
 import info.clearthought.layout.TableLayout;
-import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.*;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.Nullable;
@@ -53,13 +53,10 @@ public class SendBugReportAction extends AbstractAction
   private static final String DLG_SEND_DATA_OPTION = NbBundle.getMessage(SendBugReportAction.class, "NAME_SendBugReportDialog_SendData");
   private final TemporaryFileProvider temporaryFileProvider = new TemporaryFileProvider();
 
-  @SuppressWarnings({"FieldCanBeLocal", "unused"}) // Strong Ref
-  private final Disposable disposable;
-
   public SendBugReportAction()
   {
-    disposable = IUserAgreement.getInstance().sendingAnalyticsAllowed()
-        .subscribe(pAllowed -> SwingUtilities.invokeLater(() -> setEnabled(pAllowed))); // enable, if sendings is allowed
+    AnalyticsOnStopHook.addDisposable(IUserAgreement.getInstance().sendingAnalyticsAllowed()
+                                          .subscribe(pAllowed -> SwingUtilities.invokeLater(() -> setEnabled(pAllowed)))); // enable, if sendings is allowed
   }
 
   @Override
