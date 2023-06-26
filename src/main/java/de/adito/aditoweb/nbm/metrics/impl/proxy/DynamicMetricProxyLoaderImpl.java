@@ -10,7 +10,7 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 import org.openide.modules.Modules;
 import org.openide.util.Pair;
 import org.openide.util.lookup.ServiceProvider;
@@ -119,7 +119,7 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
       Modules.getDefault().findCodeNameBase("de.adito.aditoweb.nbm.analytics").getClassLoader()
           .loadClass("de.adito.aditoweb.nbm.metrics.impl.proxy.DynamicMetricProxyLoaderImpl$DynamicMetricInvocation")
           .getDeclaredMethod("methodEntered", Object.class, Method.class, Object[].class, Map.class)
-          .invoke(null, pTarget, pMethod, pArguments, hints);
+          .invoke(null, pTarget, pMethod, pArguments == null ? new Object[0] : pArguments, hints);
 
       return hints;
     }
@@ -147,7 +147,7 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
       Modules.getDefault().findCodeNameBase("de.adito.aditoweb.nbm.analytics").getClassLoader()
           .loadClass("de.adito.aditoweb.nbm.metrics.impl.proxy.DynamicMetricProxyLoaderImpl$DynamicMetricInvocation")
           .getDeclaredMethod("methodExited", Object.class, Method.class, Object[].class, Map.class, Object.class, Throwable.class)
-          .invoke(null, pTarget, pMethod, pArguments, pHints, pReturnValue, pThrowable);
+          .invoke(null, pTarget, pMethod, pArguments == null ? new Object[0] : pArguments, pHints, pReturnValue, pThrowable);
     }
   }
 

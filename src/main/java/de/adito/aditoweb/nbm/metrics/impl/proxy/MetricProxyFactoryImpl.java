@@ -3,6 +3,7 @@ package de.adito.aditoweb.nbm.metrics.impl.proxy;
 import de.adito.aditoweb.nbm.metrics.api.IMetricProxyFactory;
 import de.adito.aditoweb.nbm.metrics.impl.handlers.IMetricHandler;
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.lang.reflect.*;
@@ -59,16 +60,17 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
     }
 
     @Override
-    public Object invoke(Object pProxy, Method pMethod, Object[] pArgs) throws Throwable
+    public Object invoke(Object pProxy, Method pMethod, @Nullable Object[] pArgs) throws Throwable
     {
       Map<String, Object> hints = new HashMap<>();
       AtomicReference<Object> methodResult = new AtomicReference<>();
       AtomicReference<Throwable> methodException = new AtomicReference<>();
+      Object[] arguments = pArgs == null ? new Object[0] : pArgs;
 
       try
       {
         // trigger handlers
-        metricHandlerAccessor.beforeMethodCall(pProxy, pMethod, pMethod, pArgs, hints);
+        metricHandlerAccessor.beforeMethodCall(pProxy, pMethod, pMethod, arguments, hints);
 
         // call method itself and track exception, if any occured
         pMethod.setAccessible(true);
@@ -83,7 +85,7 @@ public class MetricProxyFactoryImpl implements IMetricProxyFactory
       finally
       {
         // trigger handlers
-        metricHandlerAccessor.afterMethodCall(pProxy, pMethod, pMethod, pArgs, hints, methodResult.get(), methodException.get());
+        metricHandlerAccessor.afterMethodCall(pProxy, pMethod, pMethod, arguments, hints, methodResult.get(), methodException.get());
       }
     }
   }
