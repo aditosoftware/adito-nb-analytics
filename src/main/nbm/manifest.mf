@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: true
+OpenIDE-Module-Layer: de/adito/aditoweb/nbm/metrics/layer.xml
 OpenIDE-Module-Name: Analytics and Usage Statistics
 OpenIDE-Module-Display-Category: ADITO / Analytics
 OpenIDE-Module-Long-Description: Collects common platform analytics and anonymous usage statistics.
@@ -83,4 +84,5 @@ OpenIDE-Module-Module-Dependencies: de.adito.aditoweb.modules.nbide.nb
  .netbeans.swing.outline > 1.44, org.openide.dialogs > 7.52,
  rxjava > 3.0.4, de.adito.util.reactive > 1.1.4, com.google.guava > 29.
  0.0, de.adito.picoservice.picoservice > 1.1.6, org.netbeans.modules.op
- tions.api/1 > 1.55, org.netbeans.modules.autoupdate.services > 1.65
+ tions.api/1 > 1.55, org.netbeans.modules.autoupdate.services > 1.65, o
+ rg.netbeans.api.progress/1 > 1.57

@@ -1,6 +1,8 @@
 package de.adito.aditoweb.nbm.metrics.impl.eventlogger.sentry;
 
+import com.google.common.net.MediaType;
 import de.adito.aditoweb.nbm.metrics.impl.InstallationID;
+import de.adito.aditoweb.nbm.metrics.impl.bugreports.IBugReport;
 import de.adito.aditoweb.nbm.metrics.impl.detectors.ThreadUtility;
 import de.adito.aditoweb.nbm.metrics.impl.eventlogger.IEventLogger;
 import de.adito.aditoweb.nbm.metrics.impl.user.IUserAgreement;
@@ -8,14 +10,16 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.sentry.*;
 import io.sentry.protocol.*;
 import lombok.NonNull;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 import org.netbeans.api.autoupdate.*;
 import org.openide.modules.*;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.OnShowing;
 
+import java.io.*;
 import java.lang.management.ThreadInfo;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.*;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 /**
  * @author w.glanzer, 23.06.2022
  */
+@SuppressWarnings("UnstableApiUsage")
 @ServiceProvider(service = IEventLogger.class)
 public class SentryEventLogger implements IEventLogger
 {
@@ -85,11 +90,151 @@ public class SentryEventLogger implements IEventLogger
       {
         lastSentEdtStackTraceHash = currentStackTraceHash;
         _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.FATAL, List.of(pEdtInfo), null, "EDT Stress"),
-                                                  Hint.withAttachment(new Attachment(ThreadUtility.getThreadDump(pAllThreadInfos.get())
-                                                                                         .getBytes(StandardCharsets.UTF_8),
-                                                                                     "threaddump.tdump"))));
+                                                  Hint.withAttachment(getThreadDumpAttachment(ThreadUtility.getThreadDump(pAllThreadInfos.get())))));
       }
     }
+  }
+
+  @Nullable
+  @Override
+  public String captureBugReport(@NonNull IBugReport pReport, @Nullable File pOutputFile)
+  {
+    return _catchException(() -> {
+      // Prepare event
+      SentryEvent ev = _createEvent(SentryLevel.INFO, null, null, "User Feedback - " + Instant.now().toString());
+      ev.setExtras(extractExtraInformation(pReport));
+      SentryId eventId = ev.getEventId();
+      assert eventId != null;
+      UserFeedback feedback = new UserFeedback(eventId);
+      feedback.setComments(pReport.getComment());
+      feedback.setEmail(pReport.getMail());
+      List<Attachment> attachments = extractAttachments(pReport);
+
+      if (pOutputFile == null)
+      {
+        // send to sentry
+        Sentry.captureEvent(ev, Hint.withAttachments(attachments));
+        Sentry.captureUserFeedback(feedback);
+        return eventId.toString();
+      }
+      else
+      {
+        // output to file
+        try (FileWriter writer = new FileWriter(pOutputFile, true))
+        {
+          String separator = "\n\n---\n\n";
+
+          // Event itself
+          ev.serialize(new JsonObjectWriter(writer, Integer.MAX_VALUE), NoOpLogger.getInstance());
+          writer.write(separator);
+
+          // Feedback object
+          feedback.serialize(new JsonObjectWriter(writer, Integer.MAX_VALUE), NoOpLogger.getInstance());
+          writer.write(separator);
+
+          // Attachments
+          for (Attachment attachment : attachments)
+          {
+            new JsonObjectWriter(writer, Integer.MAX_VALUE).beginObject()
+                .name("name").value(attachment.getFilename())
+                .name("bytes").value(Base64.getEncoder().encodeToString(attachment.getBytes()))
+                .endObject();
+            writer.write(separator);
+          }
+
+          return null;
+        }
+      }
+    });
+  }
+
+  /**
+   * Extracts all attachments from a bug report
+   *
+   * @param pReport Report to extract the data from
+   * @return all attachments to send
+   */
+  @NonNull
+  private List<Attachment> extractAttachments(@NonNull IBugReport pReport)
+  {
+    // Prepare attachments
+    List<Attachment> attachments = new ArrayList<>();
+
+    // Append ThreadDump
+    Optional.ofNullable(pReport.getThreadDump())
+        .map(this::getThreadDumpAttachment)
+        .ifPresent(attachments::add);
+
+    // Append Screenshots
+    Optional.ofNullable(pReport.getScreenshots())
+        .map(pScreenshots -> pScreenshots.stream()
+            .map(pScreenshot -> new Attachment(pScreenshot.getData(), "screenshot_" + pScreenshot.getName()))
+            .collect(Collectors.toList()))
+        .ifPresent(attachments::addAll);
+
+    // Append Logs
+    Optional.ofNullable(pReport.getLogs())
+        .map(pLogFiles -> pLogFiles.stream()
+            .map(pLogFile -> new Attachment(pLogFile.getData(), "log_" + pLogFile.getName(), MediaType.PLAIN_TEXT_UTF_8.toString()))
+            .collect(Collectors.toList()))
+        .ifPresent(attachments::addAll);
+
+    return attachments;
+  }
+
+  /**
+   * Extracts all extra information to send
+   *
+   * @param pReport Report to get the data from
+   * @return the extra information to append to the sentry event
+   */
+  @NonNull
+  private Map<String, Object> extractExtraInformation(@NonNull IBugReport pReport)
+  {
+    Map<String, Object> infos = new HashMap<>();
+
+    // Append System Details
+    IBugReport.OperatingSystemState systemState = pReport.getSystemState();
+    if (systemState != null)
+    {
+      // System - infos read via MXBean
+      infos.put("System", Map.of(
+          "CPU Count", systemState.getSystemCPUCount(),
+          "Load Average", systemState.getSystemLoadAverage()
+      ));
+
+      // Runtime - infos read via Runtime.getDefault()
+      infos.put("Runtime", Map.of(
+          "CPU Count", systemState.getRuntimeCPUCount(),
+          "Memory", Map.of(
+              "free", systemState.getFreeMemory(),
+              "total", systemState.getTotalMemory(),
+              "max", systemState.getMaxMemory()
+          )
+      ));
+
+      // System-Properties
+      infos.put("JVM Properties", systemState.getSystemProperties());
+    }
+
+    // Append Project Details
+    List<IBugReport.ProjectDetails> projectDetails = pReport.getProjectDetails();
+    if (projectDetails != null)
+      projectDetails.forEach(pDetail -> infos.put("Open Project: " + pDetail.getName(), pDetail.getDetails()));
+
+    return infos;
+  }
+
+  /**
+   * Creates an attachment from a given thread dump
+   *
+   * @param pThreadDump Dump as string
+   * @return the attachment
+   */
+  @NonNull
+  private Attachment getThreadDumpAttachment(@NonNull String pThreadDump)
+  {
+    return new Attachment(pThreadDump.getBytes(StandardCharsets.UTF_8), "threaddump.tdump", MediaType.PLAIN_TEXT_UTF_8.toString());
   }
 
   /**
@@ -130,19 +275,21 @@ public class SentryEventLogger implements IEventLogger
   }
 
   /**
-   * Catches all exceptions happening inside pRunnable and logs it to console
+   * Catches all exceptions happening inside pSupplier and logs it to console
    *
-   * @param pRunnable Runnable to execute
+   * @param pSupplier Function to execute
    */
-  private void _catchException(@NonNull Runnable pRunnable)
+  @Nullable
+  private <T, Ex extends Throwable> T _catchException(@NonNull ISupEx<T, Ex> pSupplier)
   {
     try
     {
-      pRunnable.run();
+      return pSupplier.get();
     }
     catch (Throwable e)
     {
       LOGGER.log(Level.WARNING, "", e);
+      return null;
     }
   }
 
@@ -230,6 +377,21 @@ public class SentryEventLogger implements IEventLogger
       if (Sentry.isEnabled())
         Sentry.endSession();
     }
+  }
+
+  /**
+   * Supplier that is capable of handling exceptions
+   *
+   * @param <T>  type of the returning object
+   * @param <Ex> exception
+   */
+  private interface ISupEx<T, Ex extends Throwable>
+  {
+    /**
+     * @return the calculated object
+     * @throws Ex exception, if any thrown
+     */
+    T get() throws Ex;
   }
 
 }
