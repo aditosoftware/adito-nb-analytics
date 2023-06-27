@@ -2,7 +2,7 @@ package de.adito.aditoweb.nbm.metrics.impl.handlers;
 
 import de.adito.picoservice.IPicoRegistry;
 import lombok.NonNull;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 import org.openide.util.Pair;
 
 import java.lang.annotation.Annotation;
@@ -28,7 +28,7 @@ public interface IMetricHandler<T extends Annotation>
    * @param pArgs       Arguments of the method
    * @param pHints      Hints to be passed to the {@link IMetricHandler#afterMethod(Annotation, Object, Method, Object[], Object, Throwable, Map)} method
    */
-  default void beforeMethod(@NonNull T pAnnotation, @Nullable Object pObject, @NonNull Method pMethod, @NonNull Object[] pArgs, @NonNull Map<String, Object> pHints)
+  default void beforeMethod(@NonNull T pAnnotation, @Nullable Object pObject, @NonNull Method pMethod, Object @NonNull [] pArgs, @NonNull Map<String, Object> pHints)
       throws Exception
   {
   }
@@ -44,7 +44,7 @@ public interface IMetricHandler<T extends Annotation>
    * @param pException  Exception if the method throwed one
    * @param pHints      Hints to get passed from the {@link IMetricHandler#beforeMethod(Annotation, Object, Method, Object[], Map)} method
    */
-  default void afterMethod(@NonNull T pAnnotation, @Nullable Object pObject, @NonNull Method pMethod, @NonNull Object[] pArgs,
+  default void afterMethod(@NonNull T pAnnotation, @Nullable Object pObject, @NonNull Method pMethod, Object @NonNull [] pArgs,
                            @Nullable Object pResult, @Nullable Throwable pException, @NonNull Map<String, Object> pHints) throws Exception
   {
   }
@@ -86,7 +86,7 @@ public interface IMetricHandler<T extends Annotation>
      * @param pHints            Hints to pass to the handlers
      */
     public void beforeMethodCall(@Nullable Object pProxy, @NonNull Method pMethod, @NonNull AnnotatedElement pAnnotatedElement,
-                                 @NonNull Object[] pArgs, @NonNull Map<String, Object> pHints)
+                                 Object @NonNull [] pArgs, @NonNull Map<String, Object> pHints)
     {
       //noinspection unchecked,rawtypes
       _onEachHandlerNoThrow(pAnnotatedElement, pInvocation -> ((IMetricHandler) pInvocation.second()).beforeMethod(pInvocation.first(), pProxy, pMethod, pArgs, pHints));
@@ -103,7 +103,7 @@ public interface IMetricHandler<T extends Annotation>
      * @param pMethodResult     Result of the method call
      * @param pException        Exception, if any occured during the method call
      */
-    public void afterMethodCall(@Nullable Object pProxy, @NonNull Method pMethod, @NonNull AnnotatedElement pAnnotatedElement, @NonNull Object[] pArgs,
+    public void afterMethodCall(@Nullable Object pProxy, @NonNull Method pMethod, @NonNull AnnotatedElement pAnnotatedElement, Object @NonNull [] pArgs,
                                 @NonNull Map<String, Object> pHints, @Nullable Object pMethodResult, @Nullable Throwable pException)
     {
       //noinspection unchecked,rawtypes

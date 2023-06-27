@@ -2,7 +2,7 @@ package de.adito.aditoweb.nbm.metrics.impl.eventlogger.sentry;
 
 import io.sentry.protocol.*;
 import lombok.NonNull;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.management.ThreadInfo;
 import java.util.*;

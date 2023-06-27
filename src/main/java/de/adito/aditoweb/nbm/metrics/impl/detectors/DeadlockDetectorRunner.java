@@ -39,7 +39,7 @@ class DeadlockDetectorRunner implements Runnable
     }
   }
 
-  void logDeadLock(@NonNull List<ThreadInfo> pDeadLockedThreads, @NonNull ThreadInfo[] pAllThreadInfos)
+  void logDeadLock(@NonNull List<ThreadInfo> pDeadLockedThreads, ThreadInfo @NonNull [] pAllThreadInfos)
   {
     Set<String> currentDeadlockedThreadNames = pDeadLockedThreads.stream()
         .map(ThreadInfo::getThreadName)

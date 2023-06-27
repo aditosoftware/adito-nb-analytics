@@ -55,7 +55,7 @@ public class SentryEventLogger implements IEventLogger
   }
 
   @Override
-  public void captureThreadDeadlock(@NonNull List<ThreadInfo> pDeadLockedThreads, @NonNull ThreadInfo[] pAllThreadInfos)
+  public void captureThreadDeadlock(@NonNull List<ThreadInfo> pDeadLockedThreads, ThreadInfo @NonNull [] pAllThreadInfos)
   {
     _catchException(() -> Sentry.captureEvent(_createEvent(SentryLevel.ERROR, pDeadLockedThreads, null, "Deadlocked Threads"),
                                               Hint.withAttachment(new Attachment(ThreadUtility.getThreadDump(pAllThreadInfos).getBytes(StandardCharsets.UTF_8),

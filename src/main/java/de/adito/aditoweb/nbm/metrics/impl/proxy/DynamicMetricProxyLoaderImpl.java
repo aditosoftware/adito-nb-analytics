@@ -169,7 +169,7 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
      * @param pArguments Arguments of the method
      * @param pHints     Hints field to be used in metric handlers
      */
-    public static void methodEntered(@Nullable Object pTarget, @NonNull Method pMethod, @NonNull Object[] pArguments, @NonNull Map<String, Object> pHints)
+    public static void methodEntered(@Nullable Object pTarget, @NonNull Method pMethod, Object @NonNull [] pArguments, @NonNull Map<String, Object> pHints)
     {
       ACCESSOR.beforeMethodCall(pTarget, pMethod, new DynamicAnnotatedElement(pMethod, findAnnotationsForMethod(pMethod)), pArguments, pHints);
     }
@@ -184,7 +184,7 @@ public class DynamicMetricProxyLoaderImpl implements IDynamicMetricProxyLoader
      * @param pReturnValue Object that the instrumented method returned. NULL if an exception occured
      * @param pThrowable   Exception that the instrumented method throwed. NULL if no exception was thrown during execution.
      */
-    public static void methodExited(@Nullable Object pTarget, @NonNull Method pMethod, @NonNull Object[] pArguments, @NonNull Map<String, Object> pHints,
+    public static void methodExited(@Nullable Object pTarget, @NonNull Method pMethod, Object @NonNull [] pArguments, @NonNull Map<String, Object> pHints,
                                     @Nullable Object pReturnValue, @Nullable Throwable pThrowable)
     {
       ACCESSOR.afterMethodCall(pTarget, pMethod, new DynamicAnnotatedElement(pMethod, findAnnotationsForMethod(pMethod)), pArguments, pHints, pReturnValue, pThrowable);

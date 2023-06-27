@@ -3,7 +3,7 @@ package de.adito.aditoweb.nbm.metrics.impl.eventlogger.sentry.handlers;
 import com.google.common.cache.*;
 import de.adito.aditoweb.nbm.metrics.api.types.Traced;
 import de.adito.aditoweb.nbm.metrics.impl.handlers.*;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.*;
 
@@ -28,7 +28,7 @@ class SentryTracedMetricHandler implements IMetricHandler<Traced>
       .build();
 
   @Override
-  public void beforeMethod(@NotNull Traced pAnnotation, @Nullable Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs, @NotNull Map<String, Object> pHints)
+  public void beforeMethod(@NonNull Traced pAnnotation, @Nullable Object pObject, @NonNull Method pMethod, Object @NonNull [] pArgs, @NonNull Map<String, Object> pHints)
   {
     String transactionKey = pAnnotation.transaction();
     boolean transactionStarted = false;
@@ -61,8 +61,8 @@ class SentryTracedMetricHandler implements IMetricHandler<Traced>
   }
 
   @Override
-  public void afterMethod(@NotNull Traced pAnnotation, @Nullable Object pObject, @NotNull Method pMethod, @NotNull Object[] pArgs, @Nullable Object pResult,
-                          @Nullable Throwable pException, @NotNull Map<String, Object> pHints)
+  public void afterMethod(@NonNull Traced pAnnotation, @Nullable Object pObject, @NonNull Method pMethod, Object @NonNull [] pArgs, @Nullable Object pResult,
+                          @Nullable Throwable pException, @NonNull Map<String, Object> pHints)
   {
     // Execute finishables, if anything has to be finished
     Object finishable = pHints.remove(HINT_FINISHABLE);

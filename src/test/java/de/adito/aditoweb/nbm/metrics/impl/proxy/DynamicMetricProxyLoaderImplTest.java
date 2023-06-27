@@ -3,7 +3,7 @@ package de.adito.aditoweb.nbm.metrics.impl.proxy;
 import de.adito.aditoweb.nbm.metrics.api.types.MetricType;
 import de.adito.aditoweb.nbm.metrics.impl.handlers.*;
 import lombok.*;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 import org.openide.modules.*;
@@ -186,7 +186,7 @@ class DynamicMetricProxyLoaderImplTest
 
     @Override
     public void beforeMethod(@NonNull MyTestMethod pAnnotation, @Nullable Object pObject, @NonNull Method pMethod,
-                             @NonNull Object[] pArgs, @NonNull Map<String, Object> pHints)
+                             Object @NonNull [] pArgs, @NonNull Map<String, Object> pHints)
         throws Exception
     {
       delegate.beforeMethod(pAnnotation, pObject, pMethod, pArgs, pHints);
@@ -194,7 +194,7 @@ class DynamicMetricProxyLoaderImplTest
 
     @Override
     public void afterMethod(@NonNull MyTestMethod pAnnotation, @Nullable Object pObject, @NonNull Method pMethod,
-                            @NonNull Object[] pArgs, @Nullable Object pResult, @Nullable Throwable pException, @NonNull Map<String, Object> pHints)
+                            Object @NonNull [] pArgs, @Nullable Object pResult, @Nullable Throwable pException, @NonNull Map<String, Object> pHints)
         throws Exception
     {
       delegate.afterMethod(pAnnotation, pObject, pMethod, pArgs, pResult, pException, pHints);

@@ -34,7 +34,7 @@ public interface IEventLogger
    * @param pDeadLockedThreads Threads that deadlocked
    * @param pAllThreadInfos    All Threads
    */
-  void captureThreadDeadlock(@NonNull List<ThreadInfo> pDeadLockedThreads, @NonNull ThreadInfo[] pAllThreadInfos);
+  void captureThreadDeadlock(@NonNull List<ThreadInfo> pDeadLockedThreads, ThreadInfo @NonNull [] pAllThreadInfos);
 
   /**
    * Captured, that the EDT is under heavy load
