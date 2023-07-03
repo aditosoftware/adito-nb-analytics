@@ -261,6 +261,7 @@ public class SentryEventLogger implements IEventLogger
             Sentry.configureScope(pScope -> {
               User user = new User();
               user.setId(InstallationID.get().getID());
+              pScope.setTag("adito.version", InstallationID.get().getFullVersion());
               pScope.setUser(user);
               pScope.setTag("os", System.getProperty("os.name"));
               getInstalledPlugins().forEach(pScope::setTag);

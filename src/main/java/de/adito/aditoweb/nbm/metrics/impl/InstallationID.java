@@ -48,15 +48,6 @@ public class InstallationID
   }
 
   /**
-   * @return the textual interpretation of the installation id
-   */
-  @NonNull
-  public String asText()
-  {
-    return getID() + "-" + getVersion();
-  }
-
-  /**
    * @return the installation id without version
    */
   @NonNull
@@ -70,15 +61,24 @@ public class InstallationID
    */
   public boolean isUnknownVersion()
   {
-    String v = getVersion();
+    String v = getFullVersion();
     return v.endsWith("DEV") || v.equals("UNKNOWN");
   }
 
   /**
-   * @return the adito version
+   * @return the adito version, without the RC/TEST specifications
    */
   @NonNull
   public String getVersion()
+  {
+    return getFullVersion().split("_")[0];
+  }
+
+  /**
+   * @return the adito version, containing all specifications
+   */
+  @NonNull
+  public String getFullVersion()
   {
     if (aditoVersion == null)
     {
