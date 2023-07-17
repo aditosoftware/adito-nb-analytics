@@ -20,7 +20,7 @@ import org.openide.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
-import javax.swing.text.BadLocationException;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
@@ -51,6 +51,7 @@ public class SendBugReportAction extends AbstractAction
                                                                                  .setNameFormat("tBugReport-%d")
                                                                                  .build());
   private static final String DLG_SEND_DATA_OPTION = NbBundle.getMessage(SendBugReportAction.class, "NAME_SendBugReportDialog_SendData");
+  private static final int FEEDBACK_TEXT_LIMIT = 2000;
   private final TemporaryFileProvider temporaryFileProvider = new TemporaryFileProvider();
 
   public SendBugReportAction()
@@ -235,6 +236,7 @@ public class SendBugReportAction extends AbstractAction
 
       // Lower comment section for user input
       commentArea = new JTextArea();
+      ((AbstractDocument) commentArea.getDocument()).setDocumentFilter(new DocumentSizeFilter(FEEDBACK_TEXT_LIMIT));
       tlu.add(0, 4, new JScrollPane(commentArea));
 
       // Contact information
@@ -362,6 +364,48 @@ public class SendBugReportAction extends AbstractAction
         log.log(Level.WARNING, "", ex);
       }
     }
+  }
+
+  /**
+   * Filter, that only allows a specific amount of text.
+   * Exceeding text will be truncated.
+   */
+  @RequiredArgsConstructor
+  private static class DocumentSizeFilter extends DocumentFilter
+  {
+    /**
+     * Character limit
+     */
+    private final int maxCharacters;
+
+    @Override
+    public void insertString(FilterBypass fb, int offset, String str, AttributeSet attr) throws BadLocationException
+    {
+      if ((fb.getDocument().getLength() + str.length()) <= maxCharacters)
+        super.insertString(fb, offset, str, attr);
+      else
+      {
+        // Handle the case where the inserted text would exceed the character limit.
+        int charactersToInsert = maxCharacters - fb.getDocument().getLength();
+        if (charactersToInsert > 0)
+          super.insertString(fb, offset, str.substring(0, charactersToInsert), attr);
+      }
+    }
+
+    @Override
+    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+    {
+      if ((fb.getDocument().getLength() + text.length() - length) <= maxCharacters)
+        super.replace(fb, offset, length, text, attrs);
+      else
+      {
+        // Handle the case where the replacement text would exceed the character limit.
+        int charactersToInsert = maxCharacters - fb.getDocument().getLength() + length;
+        if (charactersToInsert > 0)
+          super.replace(fb, offset, length, text.substring(0, charactersToInsert), attrs);
+      }
+    }
+
   }
 
 }
