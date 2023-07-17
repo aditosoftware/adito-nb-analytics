@@ -12,6 +12,7 @@ import org.openide.modules.Places;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
@@ -61,22 +62,31 @@ class DefaultBugReportFactory implements IBugReportFactory
   {
     try
     {
-      Robot robot = new Robot();
       return Arrays.stream(Window.getWindows())
           .filter(Window::isVisible)
           .map(pWindow -> {
+            Graphics2D g2d = null;
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream())
             {
-              Rectangle rect = new Rectangle();
-              rect.setLocation(pWindow.getLocationOnScreen());
-              rect.setSize(pWindow.getSize());
-              ImageIO.write(robot.createScreenCapture(rect), "jpg", baos);
+              BufferedImage img = new BufferedImage(pWindow.getWidth(), pWindow.getHeight(), BufferedImage.TYPE_INT_RGB);
+              g2d = img.createGraphics();
+
+              // Paint everything to the image
+              pWindow.paint(g2d);
+
+              // write the gathered data on the output stream
+              ImageIO.write(img, "jpg", baos);
               return new Screenshot(pWindow.getName() + ".jpg", baos.toByteArray());
             }
             catch (Exception e)
             {
               log.log(Level.WARNING, "Failed to render screenshot to file", e);
               return null;
+            }
+            finally
+            {
+              if (g2d != null)
+                g2d.dispose();
             }
           })
           .filter(Objects::nonNull)
