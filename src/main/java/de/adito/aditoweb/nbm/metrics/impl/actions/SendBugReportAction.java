@@ -388,7 +388,10 @@ public class SendBugReportAction extends AbstractAction
         // Handle the case where the inserted text would exceed the character limit.
         int charactersToInsert = maxCharacters - fb.getDocument().getLength();
         if (charactersToInsert > 0)
+        {
+          Toolkit.getDefaultToolkit().beep(); // singal, that something "unexpected" happened
           super.insertString(fb, offset, str.substring(0, charactersToInsert), attr);
+        }
       }
     }
 
@@ -402,7 +405,10 @@ public class SendBugReportAction extends AbstractAction
         // Handle the case where the replacement text would exceed the character limit.
         int charactersToInsert = maxCharacters - fb.getDocument().getLength() + length;
         if (charactersToInsert > 0)
+        {
+          Toolkit.getDefaultToolkit().beep(); // singal, that something "unexpected" happened
           super.replace(fb, offset, length, text.substring(0, charactersToInsert), attrs);
+        }
       }
     }
 
