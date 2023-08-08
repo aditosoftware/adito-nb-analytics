@@ -452,7 +452,7 @@ public class SentryEventLogger implements IEventLogger
 
     /**
      * Appends random stacktrace elements to the given element array,
-     * so Sentry is forced to not combining those exceptions
+     * so Sentry is forced to not combine those exceptions
      *
      * @param pOriginalElements Original elements
      * @return the elements, with the appended generated ones
