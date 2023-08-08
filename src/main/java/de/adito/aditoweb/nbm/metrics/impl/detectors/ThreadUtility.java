@@ -1,6 +1,7 @@
 package de.adito.aditoweb.nbm.metrics.impl.detectors;
 
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.management.*;
 import java.util.*;
@@ -22,12 +23,16 @@ public class ThreadUtility
   @NonNull
   static String getThreadInfoStacktrace(@NonNull ThreadInfo pThreadInfo)
   {
+    Thread.State state = getThreadState(pThreadInfo);
+    if (state == null)
+      state = Thread.State.TERMINATED;
+
     StringBuilder sb = new StringBuilder("\"" + pThreadInfo.getThreadName() + "\"" +
                                              (pThreadInfo.isDaemon() ? " daemon" : "") +
                                              " prio=" + pThreadInfo.getPriority() +
                                              " tid=0x" + String.format("%X", pThreadInfo.getThreadId()) +
                                              " nid=NA " +
-                                             pThreadInfo.getThreadState().toString().toLowerCase());
+                                             state.toString().toLowerCase());
     if (pThreadInfo.getLockName() != null)
     {
       sb.append(" on " + pThreadInfo.getLockName());
@@ -46,7 +51,7 @@ public class ThreadUtility
       sb.append(" (in native)");
     }
     sb.append('\n');
-    sb.append("  java.lang.Thread.State: ").append(pThreadInfo.getThreadState()).append("\n");
+    sb.append("  java.lang.Thread.State: ").append(state).append("\n");
     StackTraceElement[] stackTrace = pThreadInfo.getStackTrace();
     int i = 0;
     for (; i < stackTrace.length; i++)
@@ -56,7 +61,7 @@ public class ThreadUtility
       sb.append('\n');
       if (i == 0 && pThreadInfo.getLockInfo() != null)
       {
-        Thread.State ts = pThreadInfo.getThreadState();
+        Thread.State ts = state;
         switch (ts)
         {
           case BLOCKED:
@@ -122,5 +127,21 @@ public class ThreadUtility
         .map(ThreadInfo::toString)
         .map(String::valueOf)
         .collect(Collectors.joining("\n")) + "\n";
+  }
+
+  /**
+   * Extracts the thread state of the given info.
+   * This method is necessary, because IntelliJ should interpret TIMED_WAITING and WAITING the same way
+   *
+   * @param pInfo Info to read the state from
+   * @return the state
+   */
+  @Nullable
+  private static Thread.State getThreadState(@NonNull ThreadInfo pInfo)
+  {
+    Thread.State state = pInfo.getThreadState();
+    if (state == Thread.State.TIMED_WAITING)
+      state = Thread.State.WAITING;
+    return state;
   }
 }
