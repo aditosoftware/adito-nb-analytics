@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.*;
 import java.util.stream.Collectors;
+import java.util.zip.*;
 
 /**
  * @author w.glanzer, 23.06.2022
@@ -174,12 +175,67 @@ public class SentryEventLogger implements IEventLogger
 
     // Append Logs
     Optional.ofNullable(pReport.getLogs())
-        .map(pLogFiles -> pLogFiles.stream()
-            .map(pLogFile -> new Attachment(pLogFile.getData(), "log_" + pLogFile.getName(), MediaType.PLAIN_TEXT_UTF_8.toString()))
-            .collect(Collectors.toList()))
+        .map(pLogFiles -> {
+          List<Attachment> result = new ArrayList<>();
+          List<IBugReport.LogFile> remainingFiles = new ArrayList<>(pLogFiles);
+
+          // Add a "standalone" messages.log, if possible - so it will be accessable more quickly
+          for (Iterator<IBugReport.LogFile> iterator = remainingFiles.iterator(); iterator.hasNext(); )
+          {
+            IBugReport.LogFile file = iterator.next();
+            if ("messages.log".equalsIgnoreCase(file.getName()))
+            {
+              result.add(new Attachment(file.getData(), "log_" + file.getName(), MediaType.PLAIN_TEXT_UTF_8.toString()));
+              iterator.remove();
+            }
+          }
+
+          // Combine all other log files into one large zip file
+          if (!remainingFiles.isEmpty())
+          {
+            Attachment others = compress(remainingFiles.stream().collect(Collectors.toMap(pLogFile -> "log_" + pLogFile.getName(), IBugReport.LogFile::getData)));
+            if (others != null)
+              result.add(others);
+          }
+
+          return result;
+        })
         .ifPresent(attachments::addAll);
 
     return attachments;
+  }
+
+  /**
+   * Combines the given data into a large zip file
+   *
+   * @param pFiles Files to compress to a zip file
+   * @return the zip file as attachment or null, if it could not be created
+   */
+  @Nullable
+  private Attachment compress(@NonNull Map<String, byte[]> pFiles)
+  {
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+         ZipOutputStream zos = new ZipOutputStream(baos))
+    {
+      // Add everything to the ZipOutputStream
+      for (Map.Entry<String, byte[]> file : pFiles.entrySet())
+      {
+        zos.putNextEntry(new ZipEntry(file.getKey()));
+        zos.write(file.getValue());
+        zos.closeEntry();
+      }
+
+      // close the zip, because we finished
+      zos.close();
+
+      // return a new attachment
+      return new Attachment(baos.toByteArray(), "log_others.zip", MediaType.ZIP.toString());
+    }
+    catch (IOException e)
+    {
+      LOGGER.log(Level.WARNING, "", e);
+      return null;
+    }
   }
 
   /**
