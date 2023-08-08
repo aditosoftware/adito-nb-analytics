@@ -19,11 +19,10 @@ import org.openide.windows.OnShowing;
 import java.io.*;
 import java.lang.management.ThreadInfo;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 import java.util.zip.*;
 
 /**
@@ -102,7 +101,7 @@ public class SentryEventLogger implements IEventLogger
   {
     return _catchException(() -> {
       // Prepare event
-      SentryEvent ev = _createEvent(SentryLevel.INFO, null, null, "User Feedback - " + Instant.now().toString());
+      SentryEvent ev = _createEvent(SentryLevel.INFO, null, new UserFeedbackEvent(), null);
       ev.setExtras(extractExtraInformation(pReport));
       SentryId eventId = ev.getEventId();
       assert eventId != null;
@@ -433,6 +432,46 @@ public class SentryEventLogger implements IEventLogger
     {
       if (Sentry.isEnabled())
         Sentry.endSession();
+    }
+  }
+
+  /**
+   * Exception that gets transmitted to sentry, if a userfeedback should be sent
+   */
+  private static class UserFeedbackEvent extends Exception
+  {
+    /**
+     * Length of the random trace generation
+     */
+    private static final int RANDOM_TRACE_DEPTH = 3;
+
+    public UserFeedbackEvent()
+    {
+      setStackTrace(appendRandomStackTraceElements(getStackTrace()));
+    }
+
+    /**
+     * Appends random stacktrace elements to the given element array,
+     * so Sentry is forced to not combining those exceptions
+     *
+     * @param pOriginalElements Original elements
+     * @return the elements, with the appended generated ones
+     */
+    @NonNull
+    private StackTraceElement[] appendRandomStackTraceElements(StackTraceElement @NonNull [] pOriginalElements)
+    {
+      List<StackTraceElement> elements = new ArrayList<>();
+
+      // Add random stacktrace elements
+      IntStream.range(0, RANDOM_TRACE_DEPTH)
+          .mapToObj(pIdx -> new StackTraceElement(getClass().getName() + ".Dyn_" + new Random().nextInt(Integer.MAX_VALUE),
+                                                  "init", "Dynamic_" + new Random().nextInt(Integer.MAX_VALUE) + ".java", -1))
+          .forEachOrdered(elements::add);
+
+      // Append all current stacktrace elements, so it stays human readable in sentry logging
+      elements.addAll(Arrays.asList(pOriginalElements));
+
+      return elements.toArray(new StackTraceElement[0]);
     }
   }
 
