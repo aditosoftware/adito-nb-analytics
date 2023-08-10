@@ -6,6 +6,13 @@ OpenIDE-Module-Display-Category: ADITO / Analytics
 OpenIDE-Module-Long-Description: Collects common platform analytics and anonymous usage statistics.
  This data is send to ADITO, to improve the overall stability of the ADITO Designer at runtime.
   <p style="font-weight: bold;">Changelog</p>
+  <p style="font-weight: bold;">v1.2.4</p>
+  <p style="margin-left: 10px; font-weight: bold;">MINOR</p>
+  <ul>
+    <li>Combine all log files into a log_others.zip, except messages.log</li>
+    <li>Added dynamic stack traces, so sentry will not combine the occured events</li>
+    <li>Replaced the thread state TIMED_WAITING with WAITING in thread dumps</li>
+  </ul>
   <p style="font-weight: bold;">v1.2.3</p>
   <p style="margin-left: 10px; font-weight: bold;">MINOR</p>
   <ul>
